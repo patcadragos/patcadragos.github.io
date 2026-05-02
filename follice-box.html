@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Follice Box — Autonomous Robotics Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #0a0a0a;
+            color: #e8e8e8;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        :root {
+            --accent: #FF6B00;
+            --text-primary: #e8e8e8;
+            --text-secondary: #b8b8b8;
+            --border: rgba(255, 107, 0, 0.2);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; margin-bottom: 1.5rem; }
+        h3 { font-size: 1.3rem; margin: 2rem 0 1rem; }
+
+        p { margin-bottom: 1.5rem; color: var(--text-secondary); }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover { color: #ff7d1a; }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 2rem;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, var(--accent), #ff7d1a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover::after { opacity: 1; }
+
+        header.page-header {
+            padding: calc(60px + 4rem) 2rem 4rem;
+            background: linear-gradient(135deg, #0f0f0f 0%, #0a0a0a 100%);
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header.page-header h1 {
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header.page-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 4rem 2rem;
+        }
+
+        .section-header {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 47.5px;
+            background: var(--accent);
+        }
+
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: rgba(255, 107, 0, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .specs-table th {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(255, 107, 0, 0.05));
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .specs-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.1);
+        }
+
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        .tech-tag {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(255, 107, 0, 0.05));
+            border: 1px solid var(--border);
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 4px;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            margin: 1rem 0.5rem 1rem 0;
+            background: var(--accent);
+            color: #0a0a0a;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 2px solid var(--accent);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: transparent;
+            color: var(--accent);
+        }
+
+        .pdf-section {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.08), rgba(255, 107, 0, 0.02));
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin: 2rem 0;
+        }
+
+        .pdf-section h3 {
+            margin-top: 0;
+        }
+
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        ul li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(255, 107, 0, 0.03));
+            margin-top: 4rem;
+        }
+
+        footer p {
+            margin: 0;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            border-color: var(--accent);
+            background: rgba(255, 107, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            header.page-header {
+                padding: calc(60px + 3rem) 1.5rem 3rem;
+            }
+
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+
+            section {
+                padding: 3rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav>
+        <a href="index.html" class="nav-brand">DRAGOS</a>
+        <ul class="nav-links">
+            <li><a href="index.html#projects">Back to Projects</a></li>
+        </ul>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+        <div class="container">
+            <h1>FOLLICE BOX</h1>
+            <p>Autonomous Follow-Me Cooler System</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- BACK LINK -->
+        <div style="margin-top: 3rem;">
+            <a href="index.html#projects" class="back-link">
+                <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>Back to Projects
+            </a>
+        </div>
+
+        <!-- PROJECT OVERVIEW -->
+        <section>
+            <div class="section-header">
+                <h2>Project Overview</h2>
+            </div>
+            <p>The FOLLICE BOX is an innovative autonomous follow-me cooler designed for outdoor environments. It combines a 50L insulated storage unit with a 24V motorized differential drive system, advanced obstacle detection, and up to 3 hours of runtime. Built for portability and efficiency, this project showcases autonomous robotics in a practical, consumer-friendly application.</p>
+
+            <h3>Key Specifications</h3>
+            <table class="specs-table">
+                <tr>
+                    <th>Specification</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Storage Capacity</td>
+                    <td>50L Insulated Box</td>
+                </tr>
+                <tr>
+                    <td>Length</td>
+                    <td>862 mm</td>
+                </tr>
+                <tr>
+                    <td>Width</td>
+                    <td>500 mm</td>
+                </tr>
+                <tr>
+                    <td>Height</td>
+                    <td>442.5 mm</td>
+                </tr>
+                <tr>
+                    <td>Operating Mass</td>
+                    <td>50 kg</td>
+                </tr>
+                <tr>
+                    <td>Top Speed</td>
+                    <td>1.2 m/s</td>
+                </tr>
+                <tr>
+                    <td>Maximum Slope</td>
+                    <td>10°</td>
+                </tr>
+                <tr>
+                    <td>Runtime</td>
+                    <td>Up to 3 hours</td>
+                </tr>
+                <tr>
+                    <td>Estimated Budget</td>
+                    <td>€300–400</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- MECHANICAL DESIGN -->
+        <section>
+            <div class="section-header">
+                <h2>Mechanical Design</h2>
+            </div>
+            <h3>Chassis & Structure</h3>
+            <p>The Follice Box features a sturdy 24V motorized differential drive chassis designed for autonomous movement across varied terrain. The chassis supports the full 50L insulated storage unit with balanced weight distribution for optimal stability.</p>
+
+            <h3>Drive System</h3>
+            <p>Differential drive mechanism enables precise turning and smooth acceleration. Two independently controlled motors provide responsive steering for obstacle avoidance and user tracking capabilities.</p>
+
+            <h3>Insulation & Storage</h3>
+            <p>A high-quality 50L insulated storage compartment maintains temperature integrity for beverages and provisions. The design prioritizes both capacity and portability for outdoor use.</p>
+        </section>
+
+        <!-- ELECTRONICS & CONTROLS -->
+        <section>
+            <div class="section-header">
+                <h2>Electronics & Control Systems</h2>
+            </div>
+            <div class="tech-tags">
+                <span class="tech-tag">ESP32</span>
+                <span class="tech-tag">Cytron MDDS30</span>
+                <span class="tech-tag">Li-ion 7S</span>
+                <span class="tech-tag">ToF Sensor</span>
+                <span class="tech-tag">24V Motor</span>
+                <span class="tech-tag">Differential Drive</span>
+            </div>
+
+            <h3>Autonomous Navigation</h3>
+            <ul>
+                <li><strong>ESP32 Microcontroller:</strong> Core processing unit for autonomous decision-making</li>
+                <li><strong>ToF (Time-of-Flight) Sensor:</strong> Precise obstacle detection and distance measurement</li>
+                <li><strong>Obstacle Avoidance:</strong> Real-time sensor fusion for safe autonomous operation</li>
+                <li><strong>User Tracking:</strong> Follows operator at adjustable distance</li>
+            </ul>
+
+            <h3>Power System</h3>
+            <ul>
+                <li><strong>Li-ion 7S Battery Pack:</strong> High-capacity energy storage for extended runtime</li>
+                <li><strong>24V Motor System:</strong> Reliable, field-tested motor technology</li>
+                <li><strong>Cytron MDDS30 Motor Driver:</strong> Professional-grade motor control with safety features</li>
+            </ul>
+        </section>
+
+        <!-- PROJECT PDF -->
+        <section>
+            <div class="section-header">
+                <h2>Complete Documentation</h2>
+            </div>
+            <div class="pdf-section">
+                <h3>Project PDF Presentation</h3>
+                <p>Download the complete FOLLICE BOX project documentation, including detailed system description, mechanical and electronic components, autonomous operation, user benefits, and essential technical data.</p>
+                <p><strong>What's Included:</strong></p>
+                <ul>
+                    <li>Project objectives and device purpose</li>
+                    <li>Technical schema and design elements</li>
+                    <li>Features and autonomous operating modes</li>
+                    <li>User benefits and practical advantages</li>
+                    <li>Specifications and technical performance data</li>
+                    <li>Conclusions and future enhancement possibilities</li>
+                </ul>
+                <a href="FOLLICE%20BOX.pdf" class="btn" download>
+                    <i class="fas fa-download"></i> Download PDF (Complete Presentation)
+                </a>
+            </div>
+
+            <h3>View Full Documentation</h3>
+            <p>Access the embedded PDF viewer below to review the complete project presentation:</p>
+            <iframe src="FOLLICE%20BOX.pdf" style="width: 100%; height: 900px; border: 1px solid rgba(255, 107, 0, 0.2); border-radius: 6px; margin: 2rem 0;" title="FOLLICE BOX PDF"></iframe>
+        </section>
+
+        <!-- PROJECT STATUS -->
+        <section>
+            <div class="section-header">
+                <h2>Project Status</h2>
+            </div>
+            <div style="background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(255, 107, 0, 0.05)); padding: 2rem; border-left: 4px solid var(--accent); border-radius: 4px; margin: 2rem 0;">
+                <p style="margin: 0;"><strong>Status: CONCEPT — IN DEVELOPMENT</strong></p>
+                <p style="margin: 0.75rem 0 0; font-size: 0.95rem;">This project is actively under development. The design phase is complete, and prototype construction is underway. Regular updates will track progress from prototype to final production-ready system.</p>
+            </div>
+        </section>
+
+        <!-- CALL TO ACTION -->
+        <section style="text-align: center;">
+            <h3>Interested in This Project?</h3>
+            <p>Learn more about autonomous robotics, electronics, and engineering solutions.</p>
+            <a href="index.html#contact" class="btn">Get in Touch</a>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2025 DRAGOS PATCA — Building machines that think.</p>
+    </footer>
+</body>
+</html>
