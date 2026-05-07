@@ -273,32 +273,20 @@
             background: rgba(255, 107, 0, 0.1);
         }
 
+        .pdf-wrapper {
+            position: relative;
+            width: 100%;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
         .pdf-viewer {
             width: 100%;
             height: 900px;
-            border: 1px solid rgba(255, 107, 0, 0.2);
-            border-radius: 6px;
-            margin: 2rem 0;
+            border: none;
             display: block;
-        }
-
-        .pdf-mobile-notice {
-            display: none;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(255, 107, 0, 0.05));
-            border: 1px solid rgba(255, 107, 0, 0.2);
-            border-radius: 6px;
-            margin: 1rem 0 2rem;
-            color: #b8b8b8;
-            font-size: 0.95rem;
-        }
-
-        .pdf-mobile-notice i {
-            font-size: 1.5rem;
-            color: #FF6B00;
-            flex-shrink: 0;
         }
 
         @media (max-width: 768px) {
@@ -321,22 +309,21 @@
                 padding: 3rem 1.5rem;
             }
 
+            .pdf-wrapper {
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
             .pdf-viewer {
-                height: 450px !important;
-            }
-
-            .pdf-viewer-desktop {
-                display: none;
-            }
-
-            .pdf-mobile-notice {
-                display: flex !important;
+                height: 75vh;
+                min-height: 400px;
             }
         }
 
         @media (max-width: 480px) {
             .pdf-viewer {
-                height: 320px !important;
+                height: 65vh;
+                min-height: 320px;
             }
         }
     </style>
@@ -487,11 +474,9 @@
 
             <h3>View Full Documentation</h3>
             <p>Access the embedded PDF viewer below to review the complete project presentation:</p>
-            <div class="pdf-mobile-notice">
-                <i class="fas fa-mobile-alt"></i>
-                <span>PDF viewer is not optimized for mobile. Use the download button above to view the full documentation.</span>
+            <div class="pdf-wrapper">
+                <iframe src="FOLLICE%20BOX.pdf" class="pdf-viewer" title="FOLLICE BOX PDF"></iframe>
             </div>
-            <iframe src="FOLLICE%20BOX.pdf" class="pdf-viewer" title="FOLLICE BOX PDF"></iframe>
         </section>
 
         <!-- PROJECT STATUS -->
