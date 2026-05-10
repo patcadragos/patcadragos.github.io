@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tank Duel</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#000;
+    width:100vw; height:100vh;
+    overflow:hidden;
+    touch-action:none;
+    position:relative;
+  }
+  #wrap {
+    position:absolute;
+    width:800px; height:600px;
+    transform-origin:top left;
+  }
+  canvas {
+    display:block;
+    width:800px; height:600px;
+  }
+  /* Mobile controls overlay */
+  #mctrl {
+    display:none;
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:150px;
+    pointer-events:none;
+  }
+  .mbtn {
+    position:absolute;
+    width:64px; height:64px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.45);
+    background:rgba(255,255,255,0.12);
+    color:#fff;
+    font-size:24px;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:all;
+    user-select:none; -webkit-user-select:none;
+    touch-action:none;
+    cursor:pointer;
+  }
+  .mbtn:active { background:rgba(255,255,255,0.35); }
+  /* Red - left side */
+  #bRL { left:8px;  bottom:80px; }
+  #bRR { left:82px; bottom:80px; }
+  #bRS { left:45px; bottom:10px; background:rgba(255,60,60,0.3); border-color:rgba(255,100,100,0.7); }
+  /* Yellow - right side (2P only) */
+  #bYL { right:82px; bottom:80px; }
+  #bYR { right:8px;  bottom:80px; }
+  #bYS { right:45px; bottom:10px; background:rgba(255,220,0,0.3); border-color:rgba(255,220,0,0.7); }
+  @media (max-width:860px) {
+    #mctrl { display:block; }
+  }
+  @media (max-width:480px) {
+    .mbtn { width:52px; height:52px; font-size:18px; }
+    #bRL { left:4px;  bottom:86px; }
+    #bRR { left:64px; bottom:86px; }
+    #bRS { left:34px; bottom:16px; }
+    #bYL { right:64px; bottom:86px; }
+    #bYR { right:4px;  bottom:86px; }
+    #bYS { right:34px; bottom:16px; }
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" width="800" height="600"></canvas>
+  <div id="mctrl">
+    <div class="mbtn" id="bRL">◀</div>
+    <div class="mbtn" id="bRR">▶</div>
+    <div class="mbtn" id="bRS">🔥</div>
+    <div class="mbtn" id="bYL" style="display:none">◀</div>
+    <div class="mbtn" id="bYR" style="display:none">▶</div>
+    <div class="mbtn" id="bYS" style="display:none">🔥</div>
+  </div>
+</div>
+
+<script>
+// ===================== SCALE WRAPPER =====================
+const wrap = document.getElementById('wrap');
+function scaleWrap() {
+  const sx = window.innerWidth  / 800;
+  const sy = window.innerHeight / 600;
+  const s  = Math.min(sx, sy);
+  wrap.style.transform = `scale(${s})`;
+  wrap.style.left = ((window.innerWidth  - 800*s) / 2) + 'px';
+  wrap.style.top  = ((window.innerHeight - 600*s) / 2) + 'px';
+}
+window.addEventListener('resize', scaleWrap);
+scaleWrap();
+
+// ===================== CONSTANTS (exact from Python) =====================
+const SW = 800, SH = 600;
+const WORLD_W = 1600;
+const TANK_W = 50,    TANK_H = 50;
+const BULLET_W = 20,  BULLET_H = 20;
+const POWERUP_MAX = 100; // scale_keep_ratio target
+const TANK_SPEED = 5;
+const BULLET_SPEED = 8;
+const GRAVITY = 0.4;
+const BULLET_GRAVITY_START = 400;
+const MAX_HP = 100;
+const POWERUP_TIME = 300;
+const FPS = 60;
+const COOLDOWN = 20;
+
+const LEVELS = [
+  { bg:'Assets/bg1.jpg', aiSpeed:2, pwFreq:300 },
+  { bg:'Assets/bg2.jpg', aiSpeed:3, pwFreq:250 },
+  { bg:'Assets/bg3.jpg', aiSpeed:4, pwFreq:200 }
+];
+
+// ===================== CANVAS =====================
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+// ===================== FONT LOADING =====================
+// Load ka1.ttf (same as pygame.font.Font("Assets/ka1.ttf", 70))
+const ka1Face = new FontFace('KA1', 'url(Assets/ka1.ttf)');
+let ka1Loaded = false;
+ka1Face.load().then(f => { document.fonts.add(f); ka1Loaded = true; }).catch(()=>{ ka1Loaded = true; });
+
+// ===================== ASSETS =====================
+const imgs = {};
+
+// scale_keep_ratio equivalent: draw into a canvas preserving aspect ratio within maxSz x maxSz
+function scaleKeepRatio(img, maxSz) {
+  const scale = Math.min(maxSz / img.width, maxSz / img.height);
+  const w = Math.round(img.width  * scale);
+  const h = Math.round(img.height * scale);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(img, 0, 0, w, h);
+  return c;
+}
+
+function loadImg(key, src) {
+  return new Promise(res => {
+    if (imgs[key]) { res(); return; }
+    const img = new Image();
+    img.onload = () => {
+      if (key === 'health' || key === 'speed' || key === 'damage') {
+        // scale_keep_ratio(img, (100,100))
+        imgs[key] = scaleKeepRatio(img, POWERUP_MAX);
+      } else if (key.startsWith('bg')) {
+        // scale to (WORLD_W, SH)
+        const c = document.createElement('canvas');
+        c.width = WORLD_W; c.height = SH;
+        c.getContext('2d').drawImage(img, 0, 0, WORLD_W, SH);
+        imgs[key] = c;
+      } else if (key === 'red_tank' || key === 'yellow_tank') {
+        // scale to TANK_SIZE (50,50)
+        const c = document.createElement('canvas');
+        c.width = TANK_W; c.height = TANK_H;
+        c.getContext('2d').drawImage(img, 0, 0, TANK_W, TANK_H);
+        imgs[key] = c;
+      } else if (key === 'bullet') {
+        // scale to BULLET_SIZE (20,20)
+        const c = document.createElement('canvas');
+        c.width = BULLET_W; c.height = BULLET_H;
+        c.getContext('2d').drawImage(img, 0, 0, BULLET_W, BULLET_H);
+        imgs[key] = c;
+      } else {
+        imgs[key] = img;
+      }
+      res();
+    };
+    img.onerror = () => {
+      // Fallback colored canvas
+      const fb = document.createElement('canvas');
+      if (key.startsWith('bg')) {
+        fb.width = WORLD_W; fb.height = SH;
+        const c2 = fb.getContext('2d');
+        const cols = {bg1:'#1a237e', bg2:'#1b5e20', bg3:'#4e342e'};
+        c2.fillStyle = cols[key]||'#333'; c2.fillRect(0,0,WORLD_W,SH);
+        // simple ground
+        c2.fillStyle='rgba(0,0,0,0.4)'; c2.fillRect(0,SH-60,WORLD_W,60);
+      } else if (key==='red_tank'||key==='yellow_tank') {
+        fb.width=TANK_W; fb.height=TANK_H;
+        const c2=fb.getContext('2d');
+        c2.fillStyle=key==='red_tank'?'#e53935':'#fdd835';
+        c2.fillRect(2,10,TANK_W-4,TANK_H-10);
+        c2.fillRect(TANK_W-16,18,16,8);
+        c2.fillStyle='#333'; c2.fillRect(0,TANK_H-12,TANK_W,12);
+      } else if (key==='bullet') {
+        fb.width=BULLET_W; fb.height=BULLET_H;
+        const c2=fb.getContext('2d');
+        c2.fillStyle='#ff9800';
+        c2.beginPath(); c2.ellipse(BULLET_W/2,BULLET_H/2,BULLET_W/2-2,BULLET_H/2-2,0,0,Math.PI*2); c2.fill();
+      } else if (key==='health'||key==='speed'||key==='damage') {
+        const sz=80; fb.width=sz; fb.height=sz;
+        const c2=fb.getContext('2d');
+        const col={health:'#4caf50',speed:'#2196f3',damage:'#9c27b0'}[key]||'#888';
+        c2.fillStyle=col; c2.beginPath(); c2.roundRect(4,4,sz-8,sz-8,12); c2.fill();
+        c2.font=`${sz*0.55}px serif`; c2.textAlign='center'; c2.textBaseline='middle';
+        c2.fillText({health:'❤️',speed:'⚡',damage:'💥'}[key],sz/2,sz/2);
+      }
+      imgs[key] = fb;
+      res();
+    };
+    img.src = src;
+  });
+}
+
+// ===================== AUDIO =====================
+const sfx = {};
+function loadSfx(key, src) {
+  return new Promise(res => {
+    if (sfx[key]) { res(); return; }
+    const a = new Audio();
+    a.oncanplaythrough = () => { sfx[key]=a; res(); };
+    a.onerror = () => { sfx[key]=null; res(); };
+    a.src = src;
+    setTimeout(res, 1500);
+  });
+}
+
+// Fallback beep
+let actx = null;
+function beep(freq=440, dur=0.08, vol=0.15, type='square') {
+  try {
+    if (!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.connect(g); g.connect(actx.destination);
+    o.frequency.value=freq; o.type=type;
+    g.gain.setValueAtTime(vol,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);
+    o.start(); o.stop(actx.currentTime+dur);
+  } catch(e){}
+}
+
+function playsfx(key, fallbackFreq=440, fallbackDur=0.08) {
+  const a = sfx[key];
+  if (a) { try { const cl=a.cloneNode(); cl.volume=0.6; cl.play().catch(()=>{}); } catch(e){} }
+  else beep(fallbackFreq, fallbackDur);
+}
+
+let bgMusic = null;
+function playMusic(src) {
+  stopMusic();
+  bgMusic = new Audio(src);
+  bgMusic.loop = true;
+  bgMusic.volume = 0.45;
+  bgMusic.play().catch(()=>{});
+}
+function stopMusic() {
+  if (bgMusic) { try{bgMusic.pause();}catch(e){} bgMusic=null; }
+}
+
+// ===================== INPUT =====================
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.code]=true; });
+window.addEventListener('keyup',   e => { keys[e.code]=false; });
+
+// Mobile buttons state
+const mb = { RL:false, RR:false, RS:false, YL:false, YR:false, YS:false };
+function bindMbtn(id, k) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  ['touchstart','mousedown'].forEach(ev =>
+    el.addEventListener(ev, e=>{ mb[k]=true; e.preventDefault(); e.stopPropagation(); },{passive:false}));
+  ['touchend','touchcancel','mouseup'].forEach(ev =>
+    el.addEventListener(ev, e=>{ mb[k]=false; e.preventDefault(); e.stopPropagation(); },{passive:false}));
+}
+bindMbtn('bRL','RL'); bindMbtn('bRR','RR'); bindMbtn('bRS','RS');
+bindMbtn('bYL','YL'); bindMbtn('bYR','YR'); bindMbtn('bYS','YS');
+
+// ===================== TOUCH UTILS =====================
+function getGamePos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {
+    x: (clientX - rect.left) * (SW / rect.width),
+    y: (clientY - rect.top)  * (SH / rect.height)
+  };
+}
+
+// ===================== DRAW UTILS =====================
+function fillText(text, x, y, color, size, align='center', fontFamily='Arial') {
+  ctx.fillStyle = color;
+  ctx.font = `${size}px ${fontFamily}`;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'top';
+  ctx.fillText(text, x, y);
+}
+
+// Draw image with optional horizontal flip (pygame.transform.flip equivalent)
+function blitFlip(imgKey, dx, dy, flipH) {
+  const src = imgs[imgKey];
+  if (!src) return;
+  if (flipH) {
+    ctx.save();
+    ctx.translate(dx + src.width, dy);
+    ctx.scale(-1, 1);
+    ctx.drawImage(src, 0, 0);
+    ctx.restore();
+  } else {
+    ctx.drawImage(src, dx, dy);
+  }
+}
+
+// ===================== MENU =====================
+// pygame.font.Font("Assets/ka1.ttf", 70) → title
+// pygame.font.SysFont(None, 36) → options (SysFont None = default sys font ~Arial)
+// options: "1 PLAYER", "2 PLAYER", "QUIT"
+// colors: title=(255,0,0), selected=(255,255,0), unselected=(200,200,200)
+// bg: screen.fill((20,20,20))
+// title at y=80, options at y=260+i*60
+
+async function mainMenu() {
+  playMusic('Assets/music_start.mp3');
+
+  const options = ['1 PLAYER', '2 PLAYER', 'QUIT'];
+  let selected = 0;
+  let pUp=false, pDown=false, pEnter=false;
+
+  return new Promise(resolve => {
+    function draw() {
+      // screen.fill((20,20,20))
+      ctx.fillStyle='rgb(20,20,20)';
+      ctx.fillRect(0,0,SW,SH);
+
+      // Title: pygame.font.Font("Assets/ka1.ttf", 70), color (255,0,0)
+      // centered at y=80
+      const titleFont = ka1Loaded ? 'KA1' : 'Impact, Arial Black, Arial';
+      fillText('TANK BATTLE', SW/2, 80, 'rgb(255,0,0)', 70, 'center', titleFont);
+
+      // Options: SysFont(None,36) ≈ Arial 28px (pygame size 36 ≈ 28px CSS)
+      options.forEach((opt, i) => {
+        const color = i===selected ? 'rgb(255,255,0)' : 'rgb(200,200,200)';
+        fillText(opt, SW/2, 260 + i*60, color, 28, 'center', 'Arial, sans-serif');
+      });
+
+      // Divider
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(180, 448); ctx.lineTo(620, 448);
+      ctx.stroke();
+
+      // Controls — P1 left, P2 right
+      fillText('PLAYER 1',      SW/4,     458, 'rgb(200,50,50)',  12, 'center', 'Arial, sans-serif');
+      fillText('A / D  —  move',  SW/4,   476, 'rgb(100,100,100)', 13, 'center', 'Arial, sans-serif');
+      fillText('SPACE  —  shoot', SW/4,   494, 'rgb(100,100,100)', 13, 'center', 'Arial, sans-serif');
+
+      // Vertical separator
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.beginPath();
+      ctx.moveTo(SW/2, 452); ctx.lineTo(SW/2, 512);
+      ctx.stroke();
+
+      fillText('PLAYER 2',        3*SW/4, 458, 'rgb(180,160,0)',   12, 'center', 'Arial, sans-serif');
+      fillText('← →  —  move',    3*SW/4, 476, 'rgb(100,100,100)', 13, 'center', 'Arial, sans-serif');
+      fillText('ENTER  —  shoot',  3*SW/4, 494, 'rgb(100,100,100)', 13, 'center', 'Arial, sans-serif');
+
+      // Tip
+      fillText('Back up — bullets drop over long range', SW/2, 548, 'rgb(65,65,65)', 13, 'center', 'Arial, sans-serif');
+
+      requestAnimationFrame(draw);
+    }
+
+    function tick() {
+      const upNow    = keys['ArrowUp']   || keys['KeyW'];
+      const downNow  = keys['ArrowDown'] || keys['KeyS'];
+      const enterNow = keys['Enter'];
+
+      if (upNow && !pUp) {
+        selected = (selected - 1 + options.length) % options.length;
+        playsfx('click', 600, 0.05);
+      }
+      if (downNow && !pDown) {
+        selected = (selected + 1) % options.length;
+        playsfx('click', 600, 0.05);
+      }
+      if (enterNow && !pEnter) {
+        playsfx('enter', 800, 0.1);
+        const opt = options[selected];
+        if (opt==='1 PLAYER') { resolve('AI');  return; }
+        if (opt==='2 PLAYER') { resolve('PVP'); return; }
+        if (opt==='QUIT')     { ctx.fillStyle='rgb(20,20,20)'; ctx.fillRect(0,0,SW,SH); return; }
+      }
+      pUp=upNow; pDown=downNow; pEnter=enterNow;
+      setTimeout(tick, 1000/FPS);
+    }
+
+    function onTap(e) {
+      const pos = getGamePos(e);
+      options.forEach((opt, i) => {
+        const oy = 260 + i*60;
+        if (pos.y >= oy - 10 && pos.y <= oy + 38) {
+          playsfx('enter', 800, 0.1);
+          canvas.removeEventListener('touchstart', onTap);
+          canvas.removeEventListener('click', onTap);
+          if (opt==='1 PLAYER') resolve('AI');
+          if (opt==='2 PLAYER') resolve('PVP');
+          if (opt==='QUIT') { ctx.fillStyle='rgb(20,20,20)'; ctx.fillRect(0,0,SW,SH); }
+        }
+      });
+      e.preventDefault();
+    }
+    canvas.addEventListener('touchstart', onTap, {passive:false});
+    canvas.addEventListener('click', onTap);
+
+    draw();
+    tick();
+  });
+}
+
+// ===================== LEVEL WON =====================
+// screen.fill((0,0,0))
+// t1: "{winner} WON LEVEL {n}!", color (0,255,0), at SH/2-20
+// t2: "Press ENTER to continue...", color (255,255,255), at SH/2+20
+// font = SysFont(None,36)
+async function levelWon(winner, levelNum) {
+  return new Promise(resolve => {
+    let waiting = true;
+    function draw() {
+      if (!waiting) return;
+      ctx.fillStyle='rgb(0,0,0)'; ctx.fillRect(0,0,SW,SH);
+      fillText(`${winner} WON LEVEL ${levelNum}!`, SW/2, SH/2-30, 'rgb(0,255,0)',    28, 'center', 'Arial, sans-serif');
+      fillText('Tap or press ENTER to continue',   SW/2, SH/2+14, 'rgb(255,255,255)', 22, 'center', 'Arial, sans-serif');
+      requestAnimationFrame(draw);
+    }
+    draw();
+    function done() {
+      if (!waiting) return;
+      waiting=false;
+      window.removeEventListener('keydown', onKey);
+      canvas.removeEventListener('touchstart', onTap);
+      canvas.removeEventListener('click', onTap);
+      resolve();
+    }
+    function onKey(e) { if (e.code==='Enter') done(); }
+    function onTap(e) { done(); e.preventDefault(); }
+    window.addEventListener('keydown', onKey);
+    canvas.addEventListener('touchstart', onTap, {passive:false});
+    canvas.addEventListener('click', onTap);
+  });
+}
+
+// ===================== GAME COMPLETED =====================
+// t1: "CONGRATULATIONS!", color (0,255,0), y=220
+// t2: "ALL LEVELS COMPLETED!", color (255,255,255), y=280
+// t3: "Press R to Restart or Q to Quit", color (200,200,200), y=340
+async function gameCompleted() {
+  return new Promise(resolve => {
+    let done = false;
+    function draw() {
+      if (done) return;
+      ctx.fillStyle='rgb(0,0,0)'; ctx.fillRect(0,0,SW,SH);
+      fillText('CONGRATULATIONS!',    SW/2, 190, 'rgb(0,255,0)',     28, 'center', 'Arial, sans-serif');
+      fillText('ALL LEVELS COMPLETED!', SW/2, 240, 'rgb(255,255,255)', 24, 'center', 'Arial, sans-serif');
+
+      // Restart button
+      ctx.strokeStyle='rgba(200,200,200,0.4)'; ctx.lineWidth=1;
+      ctx.strokeRect(SW/2-190, 316, 160, 48);
+      fillText('RESTART', SW/2-110, 330, 'rgb(200,200,200)', 22, 'center', 'Arial, sans-serif');
+      fillText('R', SW/2-110, 354, 'rgb(100,100,100)', 12, 'center', 'Arial, sans-serif');
+
+      // Quit button
+      ctx.strokeRect(SW/2+30, 316, 160, 48);
+      fillText('QUIT', SW/2+110, 330, 'rgb(200,200,200)', 22, 'center', 'Arial, sans-serif');
+      fillText('Q', SW/2+110, 354, 'rgb(100,100,100)', 12, 'center', 'Arial, sans-serif');
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+    function finish(result) {
+      if (done) return;
+      done=true;
+      window.removeEventListener('keydown', onKey);
+      canvas.removeEventListener('touchstart', onTap);
+      canvas.removeEventListener('click', onTap);
+      resolve(result);
+    }
+    function onKey(e) {
+      if (e.code==='KeyR') finish('restart');
+      if (e.code==='KeyQ') finish('quit');
+    }
+    function onTap(e) {
+      const pos = getGamePos(e);
+      if (pos.y >= 316 && pos.y <= 364) {
+        if (pos.x >= SW/2-190 && pos.x <= SW/2-30) finish('restart');
+        if (pos.x >= SW/2+30  && pos.x <= SW/2+190) finish('quit');
+      }
+      e.preventDefault();
+    }
+    window.addEventListener('keydown', onKey);
+    canvas.addEventListener('touchstart', onTap, {passive:false});
+    canvas.addEventListener('click', onTap);
+  });
+}
+
+// ===================== LEVEL =====================
+async function runLevel(levelIdx, mode) {
+  const lvl = LEVELS[levelIdx];
+
+  // Load all assets for this level (same as load_assets)
+  await Promise.all([
+    loadImg(`bg${levelIdx+1}`, lvl.bg),
+    loadImg('red_tank',    'Assets/red_tank.png'),
+    loadImg('yellow_tank', 'Assets/yellow_Tank.png'),
+    loadImg('bullet',      'Assets/bullet.png'),
+    loadImg('health',      'Assets/health.png'),
+    loadImg('speed',       'Assets/speed.png'),
+    loadImg('damage',      'Assets/damage.png'),
+  ]);
+  await Promise.all([
+    loadSfx('shoot',   'Assets/shoot.mp3'),
+    loadSfx('hit',     'Assets/hit.mp3'),
+    loadSfx('powerup', 'Assets/powerup.mp3'),
+  ]);
+
+  // pygame.mixer.music.load("Assets/music.wav"); pygame.mixer.music.play(-1)
+  playMusic('Assets/music.wav');
+
+  // Show/hide yellow mobile buttons for 2P
+  ['bYL','bYR','bYS'].forEach(id => {
+    const el=document.getElementById(id);
+    if(el) el.style.display = mode==='PVP' ? 'flex' : 'none';
+  });
+
+  // ---- State (exact from Python) ----
+  // red  = pygame.Rect(WORLD_WIDTH//2 - 200, SCREEN_HEIGHT-100, *TANK_SIZE)
+  // yellow = pygame.Rect(WORLD_WIDTH//2 + 200, SCREEN_HEIGHT-100, *TANK_SIZE)
+  let red    = { x: Math.floor(WORLD_W/2)-200, y: SH-100, w:TANK_W, h:TANK_H };
+  let yellow = { x: Math.floor(WORLD_W/2)+200, y: SH-100, w:TANK_W, h:TANK_H };
+  let red_facing    = 1;
+  let yellow_facing = -1;
+  let bullets  = [];
+  let powerups = [];
+  let health   = { red:MAX_HP, yellow:MAX_HP };
+  let display_health = { red:MAX_HP, yellow:MAX_HP };
+  let effects  = {
+    red:    { speed:0, damage:1, timer:0 },
+    yellow: { speed:0, damage:1, timer:0 }
+  };
+  let shoot_cooldown = { red:0, yellow:0 };
+  let camera_x = 0;
+  let ai_state = { timer:0, direction:0 };
+
+  // Mobile shoot: fire on press (not hold), track previous state
+  let prevRS = false, prevYS = false;
+
+  // ---- Collision ----
+  function rectCollide(a, b) {
+    return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+  }
+
+  // ---- AI (exact logic from handle_ai) ----
+  function handle_ai() {
+    if (ai_state.timer <= 0) {
+      ai_state.direction = [-1,0,1][Math.floor(Math.random()*3)];
+      ai_state.timer = 20 + Math.floor(Math.random()*41); // randint(20,60)
+    }
+    yellow.x += ai_state.direction * lvl.aiSpeed;
+    yellow.x = Math.max(0, Math.min(yellow.x, WORLD_W-TANK_W));
+    ai_state.timer -= 1;
+
+    // random.randint(0,50)==0 → ~1/51 chance
+    if (Math.floor(Math.random()*51)===0 && shoot_cooldown.yellow===0) {
+      const dx = yellow_facing===1 ? BULLET_SPEED : -BULLET_SPEED;
+      const bx = dx>0 ? yellow.x+TANK_W : yellow.x-BULLET_W;
+      bullets.push({ owner:'yellow', x:bx, y:yellow.y, w:BULLET_W, h:BULLET_H, dx, dy:0, travel:0 });
+      playsfx('shoot', 300, 0.07);
+      shoot_cooldown.yellow = COOLDOWN;
+    }
+  }
+
+  // ---- Apply powerup ----
+  function apply_powerup(player, ptype) {
+    if (ptype==='HEALTH') health[player] = Math.min(MAX_HP, health[player]+25);
+    if (ptype==='SPEED')  { effects[player].speed=3; effects[player].timer=POWERUP_TIME; }
+    if (ptype==='DAMAGE') { effects[player].damage=2; effects[player].timer=POWERUP_TIME; }
+  }
+
+  // Get powerup image size (canvas dimensions after scaleKeepRatio)
+  function pwSize(key) {
+    const img = imgs[key];
+    return img ? { w:img.width||img.naturalWidth||POWERUP_MAX, h:img.height||img.naturalHeight||POWERUP_MAX } : { w:POWERUP_MAX, h:POWERUP_MAX };
+  }
+
+  return new Promise(resolve => {
+    let running = true;
+    let lastT = null;
+    let accum = 0;
+    const MS_PER_FRAME = 1000/FPS;
+
+    function gameLoop(ts) {
+      if (!running) return;
+
+      if (lastT===null) lastT=ts;
+      accum += ts-lastT;
+      lastT = ts;
+
+      // Run logic at FPS rate
+      while (accum >= MS_PER_FRAME) {
+        accum -= MS_PER_FRAME;
+        if (!tick()) { running=false; break; }
+      }
+
+      render();
+      if (running) requestAnimationFrame(gameLoop);
+    }
+
+    // ---- TICK (one frame of logic) ----
+    function tick() {
+      // Cooldowns
+      if (shoot_cooldown.red    > 0) shoot_cooldown.red--;
+      if (shoot_cooldown.yellow > 0) shoot_cooldown.yellow--;
+
+      // ---- Red movement (A/D) ----
+      const speed_red = TANK_SPEED + effects.red.speed;
+      if (keys['KeyA'] || mb.RL) red.x -= speed_red;
+      if (keys['KeyD'] || mb.RR) red.x += speed_red;
+      red.x = Math.max(0, Math.min(red.x, WORLD_W-TANK_W));
+
+      // ---- Red shoot (SPACE, fire on keydown) ----
+      if (keys['Space'] && shoot_cooldown.red===0) {
+        if (!prevRS) {
+          const dx = red_facing===1 ? BULLET_SPEED : -BULLET_SPEED;
+          const bx = dx>0 ? red.x+TANK_W : red.x-BULLET_W;
+          bullets.push({ owner:'red', x:bx, y:red.y, w:BULLET_W, h:BULLET_H, dx, dy:0, travel:0 });
+          playsfx('shoot', 300, 0.07);
+          shoot_cooldown.red = COOLDOWN;
+        }
+      }
+      // Mobile red shoot
+      if (mb.RS && !prevRS && shoot_cooldown.red===0) {
+        const dx = red_facing===1 ? BULLET_SPEED : -BULLET_SPEED;
+        const bx = dx>0 ? red.x+TANK_W : red.x-BULLET_W;
+        bullets.push({ owner:'red', x:bx, y:red.y, w:BULLET_W, h:BULLET_H, dx, dy:0, travel:0 });
+        playsfx('shoot', 300, 0.07);
+        shoot_cooldown.red = COOLDOWN;
+      }
+      prevRS = keys['Space'] || mb.RS;
+
+      // ---- Yellow movement / AI ----
+      if (mode==='PVP') {
+        const speed_yel = TANK_SPEED + effects.yellow.speed;
+        if (keys['ArrowLeft']  || mb.YL) yellow.x -= speed_yel;
+        if (keys['ArrowRight'] || mb.YR) yellow.x += speed_yel;
+        yellow.x = Math.max(0, Math.min(yellow.x, WORLD_W-TANK_W));
+
+        // Yellow shoot (ENTER)
+        if (keys['Enter'] && shoot_cooldown.yellow===0) {
+          if (!prevYS) {
+            const dx = yellow_facing===1 ? BULLET_SPEED : -BULLET_SPEED;
+            const bx = dx>0 ? yellow.x+TANK_W : yellow.x-BULLET_W;
+            bullets.push({ owner:'yellow', x:bx, y:yellow.y, w:BULLET_W, h:BULLET_H, dx, dy:0, travel:0 });
+            playsfx('shoot', 300, 0.07);
+            shoot_cooldown.yellow = COOLDOWN;
+          }
+        }
+        if (mb.YS && !prevYS && shoot_cooldown.yellow===0) {
+          const dx = yellow_facing===1 ? BULLET_SPEED : -BULLET_SPEED;
+          const bx = dx>0 ? yellow.x+TANK_W : yellow.x-BULLET_W;
+          bullets.push({ owner:'yellow', x:bx, y:yellow.y, w:BULLET_W, h:BULLET_H, dx, dy:0, travel:0 });
+          playsfx('shoot', 300, 0.07);
+          shoot_cooldown.yellow = COOLDOWN;
+        }
+        prevYS = keys['Enter'] || mb.YS;
+      } else {
+        handle_ai();
+      }
+
+      // ---- Facing (exact from Python) ----
+      // if red.centerx > yellow.centerx: red=-1, yellow=1 else red=1, yellow=-1
+      const redCX    = red.x    + TANK_W/2;
+      const yellowCX = yellow.x + TANK_W/2;
+      if (redCX > yellowCX) { red_facing=-1; yellow_facing=1; }
+      else                  { red_facing=1;  yellow_facing=-1; }
+
+      // ---- Powerup spawn ----
+      // if random.randint(0, powerup_freq) == 0  (so 1/pwFreq+1 chance)
+      if (Math.floor(Math.random()*(lvl.pwFreq+1))===0) {
+        const types=['HEALTH','SPEED','DAMAGE'];
+        const ptype=types[Math.floor(Math.random()*3)];
+        const sz = pwSize(ptype.toLowerCase());
+        // rect: pygame.Rect(random.randint(100, WORLD_WIDTH-100), SCREEN_HEIGHT-110, *POWERUP_SIZE)
+        powerups.push({
+          type:ptype,
+          x: 100 + Math.floor(Math.random()*(WORLD_W-200)),
+          y: SH-110,
+          w: sz.w, h: sz.h
+        });
+      }
+
+      // ---- Powerup collision ----
+      powerups = powerups.filter(p => {
+        if (rectCollide(p, red)) {
+          apply_powerup('red', p.type);
+          playsfx('powerup', 880, 0.15);
+          return false;
+        }
+        if (rectCollide(p, yellow)) {
+          apply_powerup('yellow', p.type);
+          playsfx('powerup', 880, 0.15);
+          return false;
+        }
+        return true;
+      });
+
+      // ---- Effects decay ----
+      for (const pl of ['red','yellow']) {
+        if (effects[pl].timer > 0) {
+          effects[pl].timer--;
+        } else {
+          effects[pl].speed  = 0;
+          effects[pl].damage = 1;
+        }
+      }
+
+      // ---- Bullets ----
+      bullets = bullets.filter(b => {
+        b.travel += Math.abs(b.dx);
+        if (b.travel > BULLET_GRAVITY_START) b.dy += GRAVITY;
+        b.x += b.dx;
+        b.y += b.dy;
+        // out of bounds
+        if (b.y > SH || b.x < 0 || b.x > WORLD_W) return false;
+        // hit red
+        if (b.owner==='yellow' && rectCollide(b, red)) {
+          health.red -= 10 * effects.yellow.damage;
+          playsfx('hit', 180, 0.1);
+          return false;
+        }
+        // hit yellow
+        if (b.owner==='red' && rectCollide(b, yellow)) {
+          health.yellow -= 10 * effects.red.damage;
+          playsfx('hit', 180, 0.1);
+          return false;
+        }
+        return true;
+      });
+
+      // ---- Display health smoothing (exact: -=0.5 per frame) ----
+      for (const p of ['red','yellow']) {
+        if (display_health[p] > health[p]) display_health[p] -= 0.5;
+        else if (display_health[p] < health[p]) display_health[p] = health[p];
+      }
+
+      // ---- Win check ----
+      if (health.red <= 0) {
+        resolve('YELLOW');
+        return false;
+      }
+      if (health.yellow <= 0) {
+        resolve('RED');
+        return false;
+      }
+
+      // ---- Camera: follows red tank ----
+      camera_x = Math.max(0, Math.min(red.x - SW/2, WORLD_W - SW));
+      return true;
+    }
+
+    // ---- RENDER ----
+    function render() {
+      // screen.blit(bg, (-camera_x, 0))
+      const bg = imgs[`bg${levelIdx+1}`];
+      if (bg) ctx.drawImage(bg, -camera_x, 0);
+      else { ctx.fillStyle='#1a237e'; ctx.fillRect(0,0,SW,SH); }
+
+      // Tanks: pygame.transform.flip(img, facing==1, False)
+      // facing==1 means looking right → no flip? Let's match Python exactly:
+      // flip(red_img, red_facing==1, False) → flip horizontally if red_facing==1
+      blitFlip('red_tank',    red.x-camera_x,    red.y,    red_facing===1);
+      blitFlip('yellow_tank', yellow.x-camera_x, yellow.y, yellow_facing===1);
+
+      // Bullets: screen.blit(bullet_img, (b.rect.x-camera_x, b.rect.y))
+      // No rotation in original!
+      const bImg = imgs['bullet'];
+      for (const b of bullets) {
+        if (bImg) ctx.drawImage(bImg, b.x-camera_x, b.y, BULLET_W, BULLET_H);
+        else {
+          ctx.fillStyle='#ff9800';
+          ctx.fillRect(b.x-camera_x, b.y, BULLET_W, BULLET_H);
+        }
+      }
+
+      // Powerups: screen.blit(powerup_imgs[type], (rect.x-camera_x, rect.y))
+      for (const p of powerups) {
+        const pimg = imgs[p.type.toLowerCase()];
+        if (pimg) ctx.drawImage(pimg, p.x-camera_x, p.y);
+        else {
+          const cols={HEALTH:'#4caf50',SPEED:'#2196f3',DAMAGE:'#9c27b0'};
+          ctx.fillStyle=cols[p.type]||'#888';
+          ctx.fillRect(p.x-camera_x, p.y, p.w, p.h);
+        }
+      }
+
+      // ---- Health bars (exact positions from Python) ----
+      // pygame.draw.rect(screen, (255,0,0), (20, 20, 200, 20))       ← red bg
+      // pygame.draw.rect(screen, (0,255,0), (20, 20, 200*(dispHp.red/100), 20))   ← green fill
+      ctx.fillStyle='rgb(255,0,0)';
+      ctx.fillRect(20, 20, 200, 20);
+      ctx.fillStyle='rgb(0,255,0)';
+      ctx.fillRect(20, 20, 200*(Math.max(0,display_health.red)/100), 20);
+
+      // pygame.draw.rect(screen, (255,0,0), (SCREEN_WIDTH-220, 20, 200, 20))   ← red bg
+      // pygame.draw.rect(screen, (255,255,0), (SCREEN_WIDTH-220, 20, 200*(dispHp.yellow/100), 20)) ← yellow fill
+      ctx.fillStyle='rgb(255,0,0)';
+      ctx.fillRect(SW-220, 20, 200, 20);
+      ctx.fillStyle='rgb(255,255,0)';
+      ctx.fillRect(SW-220, 20, 200*(Math.max(0,display_health.yellow)/100), 20);
+    }
+
+    requestAnimationFrame(gameLoop);
+  });
+}
+
+// ===================== MAIN =====================
+async function main() {
+  // Preload menu sounds
+  await Promise.all([
+    loadSfx('click', 'Assets/ui_click.mp3'),
+    loadSfx('enter', 'Assets/ui_enter.mp3'),
+  ]);
+
+  while (true) {
+    stopMusic();
+    const mode = await mainMenu();
+    stopMusic();
+
+    // Show yellow mobile buttons only in PVP
+    ['bYL','bYR','bYS'].forEach(id => {
+      const el=document.getElementById(id);
+      if(el) el.style.display = mode==='PVP' ? 'flex' : 'none';
+    });
+
+    for (let i=0; i<LEVELS.length; i++) {
+      stopMusic();
+      const winner = await runLevel(i, mode);
+      stopMusic();
+      await levelWon(winner, i+1);
+    }
+
+    // Hide yellow mobile btns
+    ['bYL','bYR','bYS'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display='none';
+    });
+
+    stopMusic();
+    const result = await gameCompleted();
+    if (result==='quit') {
+      ctx.fillStyle='rgb(0,0,0)'; ctx.fillRect(0,0,SW,SH);
+      fillText('Thanks for playing!', SW/2, SH/2-20, '#fff', 28, 'center', 'Arial');
+      break;
+    }
+    // 'restart' → loop back to mainMenu
+  }
+}
+
+// ===================== START =====================
+main().catch(console.error);
+</script>
+</body>
+</html>

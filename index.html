@@ -485,6 +485,8 @@
             transition: all 0.3s ease;
             opacity: 0;
             transform: translateY(20px);
+            display: flex;
+            flex-direction: column;
         }
 
         .project-card.visible {
@@ -594,7 +596,8 @@
         .project-buttons {
             display: flex;
             gap: 1rem;
-            margin-top: 1.5rem;
+            margin-top: auto;
+            padding-top: 1.5rem;
         }
 
         .project-buttons .btn {
@@ -624,7 +627,8 @@
         }
 
         .project-image {
-            margin-top: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
             border-radius: 4px;
             overflow: hidden;
             border: 1px solid var(--border-light);
@@ -1127,6 +1131,9 @@
             <!-- Project 1: FOLLICE BOX -->
             <div class="project-card fade-in">
                 <span class="project-tag">Autonomous Robotics</span>
+                                <div class="project-image">
+                    <img src="images/f2.png" alt="FOLLICE BOX">
+                </div>
                 <h3>FOLLICE BOX</h3>
                 <p class="project-description">An autonomous 'follow-me' cooler box designed for outdoor use. Combines a 50L insulated storage unit with a 24V motorized chassis, differential drive, obstacle detection, and up to 3 hours runtime.</p>
                 <div class="project-status">CONCEPT — IN DEVELOPMENT</div>
@@ -1145,9 +1152,6 @@
                     <span class="tech-badge">Li-ion 7S</span>
                     <span class="tech-badge">ToF Sensor</span>
                 </div>
-                <div class="project-image">
-                    <img src="images/f2.png" alt="FOLLICE BOX">
-                </div>
                 <div class="project-buttons">
                     <a href="follice-box.html" class="btn">View Project</a>
                 </div>
@@ -1156,6 +1160,9 @@
             <!-- Project 2: AUTONOMOUS POLISHING -->
             <div class="project-card fade-in">
                 <span class="project-tag">CNC Manufacturing</span>
+                                <div class="project-image">
+                    <img src="images/f1.png" alt="Autonomous Polishing">
+                </div>
                 <h3>AUTONOMOUS POLISHING</h3>
                 <p class="project-description">A real-life CNC project: an autonomous polishing machine built with Bosch profiles, a rotating magnetic disc with 8 magnets and steel filings. Custom motor bracket manufactured on CNC.</p>
                 <div class="project-status">IN PRODUCTION</div>
@@ -1173,9 +1180,6 @@
                     <span class="tech-badge">Bosch Profiles</span>
                     <span class="tech-badge">Electrical Panel</span>
                 </div>
-                <div class="project-image">
-                    <img src="images/f1.png" alt="Autonomous Polishing">
-                </div>
                 <div class="project-buttons">
                     <a href="autonomous-polishing.html" class="btn">View Project</a>
                 </div>
@@ -1184,19 +1188,27 @@
             <!-- Project 3: PYGAME -->
             <div class="project-card fade-in">
                 <span class="project-tag">Software / Game Dev</span>
+                <div class="project-image">
+                    <img src="images/f3.png" alt="Interactive Pygame">
+                </div>
                 <h3>INTERACTIVE PYGAME</h3>
                 <p class="project-description">An interactive game built in Python with Pygame. Playable directly in the browser via Pygame web export. Combines fun gameplay with elegant code architecture.</p>
                 <div class="project-status">PLAYABLE</div>
+                <div class="project-specs">
+                    • Main menu with player selection<br>
+                    • Music and sound effects in the game<br>
+                    • WASD and Space controls for Player 1<br>
+                    • Arrow Keys and Enter controls for Player 2<br>
+                    • 3 different game levels<br>
+                    • 3 unique superpowers
+                </div>
                 <div class="project-tech">
                     <span class="tech-badge">Python</span>
                     <span class="tech-badge">Pygame</span>
                     <span class="tech-badge">Web Export</span>
                 </div>
-                <div class="project-image">
-                    <img src="images/f3.png" alt="Interactive Pygame">
-                </div>
-                <button class="btn" style="width: 100%; margin-top: 1rem;" onclick="document.getElementById('pygameModal').style.display='flex'">PLAY NOW</button>
-                <div class="project-buttons" style="margin-top: 1rem;">
+                <a href="TankBattle.html" class="btn primary" style="width: 100%; margin-top: 1rem; text-align: center;">PLAY NOW</a>
+                <div class="project-buttons">
                     <a href="#" class="btn" onclick="alert('GitHub link coming soon'); return false;">View Project</a>
                 </div>
             </div>
@@ -1204,6 +1216,9 @@
             <!-- Project 4: VIDEO CONTENT PRODUCTION -->
             <div class="project-card fade-in">
                 <span class="project-tag">Media Production</span>
+                                <div class="project-image">
+                    <img src="images/f4.png" alt="Riveria Band Logo">
+                </div>
                 <h3>MUSIC & VIDEO CONTENT</h3>
                 <p class="project-description">Behind-the-scenes video production, organizing, and editing workflow for events and social media. From shoot to publish — structured content pipelines for Riveria Band and personal projects.</p>
                 <div class="project-status">ONGOING</div>
