@@ -6,7 +6,7 @@
     <title>Dragos Patca — Mechatronics Engineering Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -237,6 +237,10 @@
         }
 
         .hero-tagline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
             font-family: 'Space Mono', monospace;
             font-size: 0.95rem;
             letter-spacing: 0.15em;
@@ -244,6 +248,16 @@
             color: var(--accent);
             margin-bottom: 1rem;
             font-weight: 700;
+        }
+
+        .hero-tagline::before,
+        .hero-tagline::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: currentColor;
+            flex-shrink: 0;
         }
 
         .hero h1 {
@@ -351,6 +365,71 @@
         .btn.primary:hover {
             background: var(--accent-dark);
             border-color: var(--accent-dark);
+        }
+
+        /* ── Variant 2: HUD Corner-Cut (PLAY NOW) ── */
+        .btn-hud-wrap {
+            position: relative;
+            display: block;
+            margin-top: 1rem;
+        }
+
+        .btn-hud-wrap::before,
+        .btn-hud-wrap::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-color: rgba(255, 107, 0, 0.45);
+            border-style: solid;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .btn-hud-wrap::before {
+            top: -4px;
+            right: -4px;
+            border-width: 2px 2px 0 0;
+        }
+
+        .btn-hud-wrap::after {
+            bottom: -4px;
+            left: -4px;
+            border-width: 0 0 2px 2px;
+        }
+
+        .btn-hud {
+            display: block;
+            width: 100%;
+            padding: 14px 28px;
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: #0a0a0a;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            text-decoration: none;
+            text-align: center;
+            clip-path: polygon(
+                12px 0%, 100% 0%,
+                100% calc(100% - 12px), calc(100% - 12px) 100%,
+                0% 100%, 0% 12px
+            );
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+
+        .btn-hud:hover {
+            background: #ff8533;
+            box-shadow: 4px 4px 0 var(--accent), 8px 8px 0 rgba(255, 107, 0, 0.25);
+        }
+
+        .btn-hud:active {
+            background: var(--accent-dark);
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 var(--accent);
         }
 
         .scroll-indicator {
@@ -976,7 +1055,7 @@
 
             }
         }
-
+        
         @media (max-width: 480px) {
             .hero {
                 padding: calc(var(--navbar-height) + 1.5rem) 1rem 4rem;
@@ -1073,7 +1152,7 @@
     <!-- HERO SECTION -->
     <section id="hero" class="hero">
         <div class="hero-content">
-            <div class="hero-tagline">— ENGINEERING PRECISION —</div>
+            <div class="hero-tagline">ENGINEERING PRECISION</div>
             <h1>DRAGOS PATCA</h1>
             <p class="hero-subtitle">Mechatronics Engineering Student · SRH University Berlin</p>
             <p class="hero-description">Building machines that think. Managing artists that feel. Blending technical precision with creative vision.</p>
@@ -1210,7 +1289,9 @@
                     <span class="tech-badge">HTML5 Canvas</span>
                     <span class="tech-badge">Mobile Ready</span>
                 </div>
-                <a href="TankBattle.html" class="btn primary" style="width: 100%; margin-top: 1rem; text-align: center;">PLAY NOW</a>
+                <div class="btn-hud-wrap">
+                    <a href="TankBattle.html" class="btn-hud">PLAY NOW</a>
+                </div>
                 <div class="project-buttons">
                     <a href="#" class="btn" onclick="alert('GitHub link coming soon'); return false;">View Project</a>
                 </div>
