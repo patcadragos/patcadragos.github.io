@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Tank Duel</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -33,31 +36,35 @@
   .mbtn {
     position:absolute;
     width:64px; height:64px;
-    border-radius:50%;
-    border:2px solid rgba(255,255,255,0.45);
-    background:rgba(255,255,255,0.12);
+    border-radius:14px;
+    border:1.5px solid rgba(255,255,255,0.18);
+    background:rgba(8,8,8,0.62);
     color:#fff;
-    font-size:24px;
     display:flex; align-items:center; justify-content:center;
     pointer-events:all;
     user-select:none; -webkit-user-select:none;
     touch-action:none;
     cursor:pointer;
+    box-shadow:0 3px 12px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.07);
+    transition:background 0.09s, transform 0.09s;
   }
-  .mbtn:active { background:rgba(255,255,255,0.35); }
+  .mbtn:active {
+    background:rgba(60,60,60,0.8);
+    transform:scale(0.91);
+  }
   /* Red - left side */
   #bRL { left:8px;  bottom:80px; }
   #bRR { left:82px; bottom:80px; }
-  #bRS { left:45px; bottom:10px; background:rgba(255,60,60,0.3); border-color:rgba(255,100,100,0.7); }
+  #bRS { left:45px; bottom:10px; background:rgba(170,25,25,0.68); border-color:rgba(255,70,70,0.45); }
   /* Yellow - right side (2P only) */
   #bYL { right:82px; bottom:80px; }
   #bYR { right:8px;  bottom:80px; }
-  #bYS { right:45px; bottom:10px; background:rgba(255,220,0,0.3); border-color:rgba(255,220,0,0.7); }
+  #bYS { right:45px; bottom:10px; background:rgba(150,130,0,0.68); border-color:rgba(255,210,0,0.45); }
   @media (max-width:860px) {
     #mctrl { display:block; }
   }
   @media (max-width:480px) {
-    .mbtn { width:52px; height:52px; font-size:18px; }
+    .mbtn { width:52px; height:52px; }
     #bRL { left:4px;  bottom:86px; }
     #bRR { left:64px; bottom:86px; }
     #bRS { left:34px; bottom:16px; }
@@ -71,12 +78,12 @@
 <div id="wrap">
   <canvas id="c" width="800" height="600"></canvas>
   <div id="mctrl">
-    <div class="mbtn" id="bRL">◀</div>
-    <div class="mbtn" id="bRR">▶</div>
-    <div class="mbtn" id="bRS">🔥</div>
-    <div class="mbtn" id="bYL" style="display:none">◀</div>
-    <div class="mbtn" id="bYR" style="display:none">▶</div>
-    <div class="mbtn" id="bYS" style="display:none">🔥</div>
+    <div class="mbtn" id="bRL"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M15 18l-6-6 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="mbtn" id="bRR"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M9 18l6-6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="mbtn" id="bRS"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><circle cx="12" cy="12" r="3.5" fill="rgba(255,255,255,0.9)"/><line x1="12" y1="2" x2="12" y2="7" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><line x1="12" y1="17" x2="12" y2="22" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><line x1="2" y1="12" x2="7" y2="12" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><line x1="17" y1="12" x2="22" y2="12" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/></svg></div>
+    <div class="mbtn" id="bYL" style="display:none"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M15 18l-6-6 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="mbtn" id="bYR" style="display:none"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M9 18l6-6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="mbtn" id="bYS" style="display:none"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><circle cx="12" cy="12" r="3.5" fill="rgba(255,255,255,0.9)"/><line x1="12" y1="2" x2="12" y2="7" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><line x1="12" y1="17" x2="12" y2="22" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><line x1="2" y1="12" x2="7" y2="12" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/><line x1="17" y1="12" x2="22" y2="12" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/></svg></div>
   </div>
 </div>
 
@@ -84,12 +91,11 @@
 // ===================== SCALE WRAPPER =====================
 const wrap = document.getElementById('wrap');
 function scaleWrap() {
-  const sx = window.innerWidth  / 800;
-  const sy = window.innerHeight / 600;
-  const s  = Math.min(sx, sy);
+  const s = Math.min(window.innerWidth / 800, window.innerHeight / 600);
+  const w = 800 * s, h = 600 * s;
   wrap.style.transform = `scale(${s})`;
-  wrap.style.left = ((window.innerWidth  - 800*s) / 2) + 'px';
-  wrap.style.top  = ((window.innerHeight - 600*s) / 2) + 'px';
+  wrap.style.left = `${(window.innerWidth  - w) / 2}px`;
+  wrap.style.top  = `${(window.innerHeight - h) / 2}px`;
 }
 window.addEventListener('resize', scaleWrap);
 scaleWrap();
@@ -527,8 +533,6 @@ async function runLevel(levelIdx, mode) {
   });
 
   // ---- State (exact from Python) ----
-  // red  = pygame.Rect(WORLD_WIDTH//2 - 200, SCREEN_HEIGHT-100, *TANK_SIZE)
-  // yellow = pygame.Rect(WORLD_WIDTH//2 + 200, SCREEN_HEIGHT-100, *TANK_SIZE)
   let red    = { x: Math.floor(WORLD_W/2)-200, y: SH-100, w:TANK_W, h:TANK_H };
   let yellow = { x: Math.floor(WORLD_W/2)+200, y: SH-100, w:TANK_W, h:TANK_H };
   let red_facing    = 1;
@@ -796,16 +800,12 @@ async function runLevel(levelIdx, mode) {
         }
       }
 
-      // ---- Health bars (exact positions from Python) ----
-      // pygame.draw.rect(screen, (255,0,0), (20, 20, 200, 20))       ← red bg
-      // pygame.draw.rect(screen, (0,255,0), (20, 20, 200*(dispHp.red/100), 20))   ← green fill
+      // ---- Health bars ----
       ctx.fillStyle='rgb(255,0,0)';
       ctx.fillRect(20, 20, 200, 20);
       ctx.fillStyle='rgb(0,255,0)';
       ctx.fillRect(20, 20, 200*(Math.max(0,display_health.red)/100), 20);
 
-      // pygame.draw.rect(screen, (255,0,0), (SCREEN_WIDTH-220, 20, 200, 20))   ← red bg
-      // pygame.draw.rect(screen, (255,255,0), (SCREEN_WIDTH-220, 20, 200*(dispHp.yellow/100), 20)) ← yellow fill
       ctx.fillStyle='rgb(255,0,0)';
       ctx.fillRect(SW-220, 20, 200, 20);
       ctx.fillStyle='rgb(255,255,0)';
