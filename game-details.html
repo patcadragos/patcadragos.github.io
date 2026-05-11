@@ -217,6 +217,12 @@
     .origin-img-wrap img {
       width: 100%; height: auto;
       display: block;
+      transition: opacity 0.22s ease, transform 0.35s ease;
+    }
+    .origin-img-wrap[data-lightbox] { cursor: pointer; }
+    .origin-img-wrap[data-lightbox]:hover img {
+      opacity: 0.85;
+      transform: scale(1.015);
     }
     .origin-img-caption {
       padding: 0.6rem 1rem;
@@ -475,9 +481,9 @@
         </ul>
       </div>
 
-      <div class="origin-img-wrap">
-        <img src="images/j5.png" alt="Original Python source code screenshot" loading="lazy">
-        <div class="origin-img-caption">// original Python source — Pygame implementation</div>
+      <div class="origin-img-wrap" data-lightbox="j5-preview" data-lb-src="images/j5.png" data-lb-alt="AI logic — Python source code for the enemy tank">
+        <img src="images/j5.png" alt="AI logic — Python source code for the enemy tank" loading="lazy">
+        <div class="origin-img-caption">// AI logic — Python source for the enemy tank in single-player mode. The AI controls targeting, movement, and decision-making for the enemy tank. Click to enlarge.</div>
       </div>
     </div>
   </div>
