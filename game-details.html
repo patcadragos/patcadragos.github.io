@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="lightbox.css">
   <style>
     :root {
       --accent:      #FF6B00;
@@ -414,17 +415,17 @@
 
 <!-- GALLERY (edge-to-edge, below nav) -->
 <div class="gallery-grid">
-  <div class="g-item">
-    <img src="Assets/j1.png" alt="Tank Duel screenshot 1" loading="lazy">
+  <div class="g-item" data-lightbox="game-screens" data-lb-alt="Tank Duel — main menu">
+    <img src="images/j1.png" alt="Tank Duel — main menu" loading="lazy">
   </div>
-  <div class="g-item">
-    <img src="Assets/j2.png" alt="Tank Duel screenshot 2" loading="lazy">
+  <div class="g-item" data-lightbox="game-screens" data-lb-alt="Tank Duel — level 1 gameplay">
+    <img src="images/j2.png" alt="Tank Duel — level 1 gameplay" loading="lazy">
   </div>
-  <div class="g-item">
-    <img src="Assets/j3.png" alt="Tank Duel screenshot 3" loading="lazy">
+  <div class="g-item" data-lightbox="game-screens" data-lb-alt="Tank Duel — level 2 gameplay">
+    <img src="images/j3.png" alt="Tank Duel — level 2 gameplay" loading="lazy">
   </div>
-  <div class="g-item">
-    <img src="Assets/j4.png" alt="Tank Duel screenshot 4" loading="lazy">
+  <div class="g-item" data-lightbox="game-screens" data-lb-alt="Tank Duel — level 3 gameplay">
+    <img src="images/j4.png" alt="Tank Duel — level 3 gameplay" loading="lazy">
   </div>
 </div>
 
@@ -475,7 +476,7 @@
       </div>
 
       <div class="origin-img-wrap">
-        <img src="Assets/j5.png" alt="Original Python source code screenshot" loading="lazy">
+        <img src="images/j5.png" alt="Original Python source code screenshot" loading="lazy">
         <div class="origin-img-caption">// original Python source — Pygame implementation</div>
       </div>
     </div>
@@ -631,8 +632,10 @@ bullets = bullets.filter(b => {
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="lightbox.js"></script>
 <script>
   hljs.highlightAll();
+  Lightbox.init();
 </script>
 </body>
 </html>

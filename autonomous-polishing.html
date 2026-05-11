@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="lightbox.css">
 
     <style>
         * {
@@ -437,55 +438,35 @@
             </div>
             <p>Real-world assembly and production images showcasing the complete machine:</p>
             <div class="gallery">
-                <div class="gallery-item">
-                    <a href="images/P1.jpeg" target="_blank">
-                        <img src="images/P1.jpeg" alt="Assembly Overview" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Assembly Overview">
+                    <img src="images/P1.jpeg" alt="Assembly Overview" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P2.jpeg" target="_blank">
-                        <img src="images/P2.jpeg" alt="Motor Mounting" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Motor Mounting">
+                    <img src="images/P2.jpeg" alt="Motor Mounting" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P3.jpeg" target="_blank">
-                        <img src="images/P3.jpeg" alt="Electrical Panel" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Electrical Panel">
+                    <img src="images/P3.jpeg" alt="Electrical Panel" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P4.jpeg" target="_blank">
-                        <img src="images/P4.jpeg" alt="Detail Assembly" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Detail Assembly">
+                    <img src="images/P4.jpeg" alt="Detail Assembly" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P5.jpeg" target="_blank">
-                        <img src="images/P5.jpeg" alt="Structural Frame" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Structural Frame">
+                    <img src="images/P5.jpeg" alt="Structural Frame" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P6.jpeg" target="_blank">
-                        <img src="images/P6.jpeg" alt="Magnetic Disc" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Magnetic Disc">
+                    <img src="images/P6.jpeg" alt="Magnetic Disc" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P7.jpeg" target="_blank">
-                        <img src="images/P7.jpeg" alt="Control System" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Control System">
+                    <img src="images/P7.jpeg" alt="Control System" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P8.jpeg" target="_blank">
-                        <img src="images/P8.jpeg" alt="Full Assembly" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Full Assembly">
+                    <img src="images/P8.jpeg" alt="Full Assembly" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P9.jpeg" target="_blank">
-                        <img src="images/P9.jpeg" alt="Production Ready" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Production Ready">
+                    <img src="images/P9.jpeg" alt="Production Ready" />
                 </div>
-                <div class="gallery-item">
-                    <a href="images/P10.jpeg" target="_blank">
-                        <img src="images/P10.jpeg" alt="Final System" />
-                    </a>
+                <div class="gallery-item" data-lightbox="project-photos" data-lb-alt="Final System">
+                    <img src="images/P10.jpeg" alt="Final System" />
                 </div>
             </div>
         </section>
@@ -521,22 +502,16 @@
                 <h3>CAD Detail Views</h3>
                 <p>Technical drawings and CAD renderings showing assembly details:</p>
                 <div class="gallery" style="margin-top: 1rem;">
-                    <div class="gallery-item">
-                        <a href="images/poza01.png" target="_blank">
-                            <img src="images/poza01.png" alt="CAD Detail 1" />
-                        </a>
+                    <div class="gallery-item" data-lightbox="cad-views" data-lb-alt="Detailed CAD Assembly">
+                        <img src="images/poza01.png" alt="CAD Detail 1" />
                         <p style="padding: 0.75rem; font-size: 0.9rem; margin: 0;">Detailed CAD Assembly</p>
                     </div>
-                    <div class="gallery-item">
-                        <a href="images/poza02.png" target="_blank">
-                            <img src="images/poza02.png" alt="CAD Detail 2" />
-                        </a>
+                    <div class="gallery-item" data-lightbox="cad-views" data-lb-alt="Mounting Details">
+                        <img src="images/poza02.png" alt="CAD Detail 2" />
                         <p style="padding: 0.75rem; font-size: 0.9rem; margin: 0;">Mounting Details</p>
                     </div>
-                    <div class="gallery-item">
-                        <a href="images/poza3.png" target="_blank">
-                            <img src="images/poza3.png" alt="2D Drawing with BOM" />
-                        </a>
+                    <div class="gallery-item" data-lightbox="cad-views" data-lb-alt="2D Drawing & BOM">
+                        <img src="images/poza3.png" alt="2D Drawing with BOM" />
                         <p style="padding: 0.75rem; font-size: 0.9rem; margin: 0;">2D Drawing & BOM</p>
                     </div>
                 </div>
@@ -593,5 +568,10 @@
     <footer>
         <p>© 2025 DRAGOS PATCA — Precision manufacturing, precision engineering.</p>
     </footer>
+
+<script src="lightbox.js"></script>
+<script>
+    Lightbox.init();
+</script>
 </body>
 </html>
