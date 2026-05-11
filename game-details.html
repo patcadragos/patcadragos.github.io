@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tank Duel — Game Details</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <style>
+    :root {
+      --accent:      #FF6B00;
+      --accent-dark: #d45a00;
+      --accent-lt:   #ff7d1a;
+      --bg:          #0a0a0a;
+      --text:        #e8e8e8;
+      --text-sec:    #b8b8b8;
+      --border:      rgba(255,107,0,0.2);
+      --border-lt:   rgba(255,107,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); margin-bottom: 1.5rem; }
+    h3 { font-size: 1.1rem; font-family: 'Space Mono', monospace; letter-spacing: 0.08em; }
+
+    p { color: var(--text-sec); margin-bottom: 1.4rem; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-lt); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(10,10,10,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, var(--accent), var(--accent-lt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      padding: 0.38rem 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.25s;
+    }
+    .nav-back::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: var(--accent);
+      z-index: -1;
+      transition: left 0.25s ease;
+    }
+    .nav-back:hover { color: #0a0a0a; }
+    .nav-back:hover::before { left: 0; }
+
+    /* ── GALLERY (edge-to-edge) ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      width: 100%;
+      margin-top: 60px; /* nav height */
+    }
+
+    .gallery-grid .g-item {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+    }
+
+    .gallery-grid .g-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.45s ease;
+    }
+
+    .gallery-grid .g-item:hover img {
+      transform: scale(1.05);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-hero {
+      padding: 4rem 2rem 3rem;
+      background: linear-gradient(180deg, #0f0f0f 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .page-hero h1 {
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-hero p {
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .tech-tag {
+      display: inline-block;
+      padding: 0.4rem 0.9rem;
+      background: linear-gradient(135deg, rgba(255,107,0,0.14), rgba(255,107,0,0.04));
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── SECTIONS ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    section { padding: 4.5rem 2rem; }
+    section + section { border-top: 1px solid var(--border-lt); }
+
+    .section-header {
+      position: relative;
+      padding-left: 1.6rem;
+      margin-bottom: 2rem;
+    }
+    .section-header::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 4px; height: 100%;
+      max-height: 52px;
+      background: var(--accent);
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* ── PYTHON ORIGIN SECTION ── */
+    .origin-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .origin-img-wrap {
+      position: relative;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .origin-img-wrap img {
+      width: 100%; height: auto;
+      display: block;
+    }
+    .origin-img-caption {
+      padding: 0.6rem 1rem;
+      background: rgba(255,107,0,0.07);
+      border-top: 1px solid var(--border);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-sec);
+      letter-spacing: 0.05em;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin: 1.2rem 0;
+    }
+    .feature-list li {
+      position: relative;
+      padding-left: 1.4rem;
+      margin-bottom: 0.65rem;
+      color: var(--text-sec);
+      font-size: 0.95rem;
+    }
+    .feature-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.8rem;
+      top: 0.1em;
+    }
+
+    /* ── CODE SNIPPETS ── */
+    .snippet-block {
+      margin-bottom: 2.8rem;
+    }
+
+    .snippet-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 0.35rem 0.9rem;
+      background: rgba(255,107,0,0.1);
+      border: 1px solid var(--border);
+      border-bottom: none;
+    }
+
+    .snippet-label span {
+      color: var(--text-sec);
+      font-size: 0.65rem;
+    }
+
+    .snippet-block pre {
+      margin: 0;
+      border: 1px solid var(--border);
+      border-radius: 0 4px 4px 4px;
+      overflow-x: auto;
+    }
+
+    .snippet-block pre code.hljs {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.65;
+      padding: 1.4rem 1.6rem;
+      background: #0d0d0d;
+    }
+
+    .snippet-desc {
+      margin-top: 0.7rem;
+      font-size: 0.9rem;
+      color: var(--text-sec);
+    }
+
+    /* ── PLAY NOW SECTION ── */
+    .play-section {
+      text-align: center;
+      padding: 5rem 2rem;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,107,0,0.06) 0%, transparent 70%);
+      border-top: 1px solid var(--border);
+    }
+
+    .play-section h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .play-section p {
+      max-width: 400px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* HUD Corner-Cut button (matches index.html) */
+    .btn-hud-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .btn-hud-wrap::before,
+    .btn-hud-wrap::after {
+      content: '';
+      position: absolute;
+      width: 9px; height: 9px;
+      border-color: rgba(255,107,0,0.5);
+      border-style: solid;
+    }
+    .btn-hud-wrap::before {
+      top: -5px; right: -5px;
+      border-width: 2px 2px 0 0;
+    }
+    .btn-hud-wrap::after {
+      bottom: -5px; left: -5px;
+      border-width: 0 0 2px 2px;
+    }
+
+    .btn-hud {
+      display: inline-block;
+      padding: 18px 56px;
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 5px;
+      color: #0a0a0a;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      text-decoration: none;
+      clip-path: polygon(
+        14px 0%, 100% 0%,
+        100% calc(100% - 14px), calc(100% - 14px) 100%,
+        0% 100%, 0% 14px
+      );
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+
+    .btn-hud:hover {
+      background: #ff8533;
+      box-shadow: 5px 5px 0 var(--accent), 10px 10px 0 rgba(255,107,0,0.25);
+      color: #0a0a0a;
+    }
+
+    .btn-hud:active {
+      background: var(--accent-dark);
+      transform: translate(2px, 2px);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2.5rem 2rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(255,107,0,0.02));
+    }
+
+    footer p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      margin: 0;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 1.2rem; }
+
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .origin-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      section { padding: 3rem 1.5rem; }
+
+      .btn-hud { padding: 16px 42px; font-size: 11px; }
+    }
+
+    @media (max-width: 480px) {
+      .gallery-grid .g-item { aspect-ratio: 4 / 3; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">DRAGOS</a>
+  <a href="index.html#projects" class="nav-back">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Projects
+  </a>
+</nav>
+
+<!-- GALLERY (edge-to-edge, below nav) -->
+<div class="gallery-grid">
+  <div class="g-item">
+    <img src="Assets/j1.png" alt="Tank Duel screenshot 1" loading="lazy">
+  </div>
+  <div class="g-item">
+    <img src="Assets/j2.png" alt="Tank Duel screenshot 2" loading="lazy">
+  </div>
+  <div class="g-item">
+    <img src="Assets/j3.png" alt="Tank Duel screenshot 3" loading="lazy">
+  </div>
+  <div class="g-item">
+    <img src="Assets/j4.png" alt="Tank Duel screenshot 4" loading="lazy">
+  </div>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Tank Duel</h1>
+    <p>A two-tank artillery duel built first in Python/Pygame, then ported to the browser in pure JavaScript.</p>
+    <div class="tech-tags">
+      <span class="tech-tag">Python</span>
+      <span class="tech-tag">Pygame</span>
+      <span class="tech-tag">JavaScript</span>
+      <span class="tech-tag">Canvas API</span>
+      <span class="tech-tag">Web Audio API</span>
+      <span class="tech-tag">2D Game Dev</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1 — PYTHON ORIGIN -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Original — Python &amp; Pygame</div>
+      <h2>Where it started</h2>
+    </div>
+
+    <div class="origin-layout">
+      <div>
+        <p>
+          Tank Duel started as a desktop game written in Python using the Pygame library.
+          The project explored 2D game architecture — scrolling worlds wider than the screen,
+          camera tracking, AI opponents, and a physics-based bullet arc that applies gravity
+          only after a certain travel distance.
+        </p>
+        <p>
+          The original codebase handled asset loading, sprite scaling, collision detection,
+          power-up spawning, and multi-level progression — all within a classic Pygame event loop.
+          Music and SFX were layered on top using <code>pygame.mixer</code>.
+        </p>
+        <ul class="feature-list">
+          <li>3 levels with increasing AI aggression</li>
+          <li>1-player (vs AI) and 2-player local co-op modes</li>
+          <li>3 power-up types: HEALTH, SPEED, DAMAGE</li>
+          <li>Scrolling 1600×600 world with camera following Player 1</li>
+          <li>Bullets arc downward past 400px travel — skill-based long shots</li>
+        </ul>
+      </div>
+
+      <div class="origin-img-wrap">
+        <img src="Assets/j5.png" alt="Original Python source code screenshot" loading="lazy">
+        <div class="origin-img-caption">// original Python source — Pygame implementation</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2 — JS CONVERSION -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Conversion — Python to JavaScript</div>
+      <h2>Rewriting for the browser</h2>
+    </div>
+
+    <p>
+      The goal was a faithful port — same logic, same constants, same AI behaviour — but running
+      natively in the browser using the Canvas 2D API and Web Audio. No game engine, no framework.
+      Three excerpts below show the most interesting translation challenges.
+    </p>
+
+    <!-- SNIPPET 1: Fixed-timestep game loop -->
+    <div class="snippet-block">
+      <div class="snippet-label">
+        01 — Fixed-timestep game loop
+        <span>/ TankBattle.html</span>
+      </div>
+      <pre><code class="language-javascript">// Pygame's clock.tick(FPS) is replaced with an accumulator loop.
+// This keeps physics deterministic regardless of frame rate.
+const MS_PER_FRAME = 1000 / FPS; // FPS = 60
+
+function gameLoop(ts) {
+  if (!running) return;
+
+  if (lastT === null) lastT = ts;
+  accum += ts - lastT;
+  lastT = ts;
+
+  // Run one logic tick per 16.67 ms accumulated
+  while (accum >= MS_PER_FRAME) {
+    accum -= MS_PER_FRAME;
+    if (!tick()) { running = false; break; }
+  }
+
+  render();
+  if (running) requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);</code></pre>
+      <p class="snippet-desc">
+        Pygame's blocking <code>clock.tick(60)</code> becomes a requestAnimationFrame loop with an accumulator.
+        Physics runs at a locked 60 Hz step; rendering runs as fast as the display allows.
+      </p>
+    </div>
+
+    <!-- SNIPPET 2: AI logic -->
+    <div class="snippet-block">
+      <div class="snippet-label">
+        02 — Enemy AI (handle_ai)
+        <span>/ direct port from Python</span>
+      </div>
+      <pre><code class="language-javascript">// Mirrors handle_ai() from the Python version exactly:
+// random direction change every 20-60 frames, random fire chance.
+function handle_ai() {
+  if (ai_state.timer <= 0) {
+    // randint(-1, 1): pick left, idle, or right
+    ai_state.direction = [-1, 0, 1][Math.floor(Math.random() * 3)];
+    ai_state.timer = 20 + Math.floor(Math.random() * 41); // randint(20, 60)
+  }
+
+  yellow.x += ai_state.direction * lvl.aiSpeed; // lvl.aiSpeed scales per level
+  yellow.x = Math.max(0, Math.min(yellow.x, WORLD_W - TANK_W));
+  ai_state.timer -= 1;
+
+  // ~1/51 chance to fire each frame (random.randint(0,50)==0)
+  if (Math.floor(Math.random() * 51) === 0 && shoot_cooldown.yellow === 0) {
+    const dx = yellow_facing === 1 ? BULLET_SPEED : -BULLET_SPEED;
+    const bx = dx > 0 ? yellow.x + TANK_W : yellow.x - BULLET_W;
+    bullets.push({ owner: 'yellow', x: bx, y: yellow.y,
+                   w: BULLET_W, h: BULLET_H, dx, dy: 0, travel: 0 });
+    shoot_cooldown.yellow = COOLDOWN;
+  }
+}</code></pre>
+      <p class="snippet-desc">
+        The AI is deliberately simple — random walk with random shooting — but level 3 uses
+        <code>aiSpeed: 4</code> and <code>pwFreq: 200</code> to make it feel harder without changing the core logic.
+      </p>
+    </div>
+
+    <!-- SNIPPET 3: Bullet gravity + AABB collision -->
+    <div class="snippet-block">
+      <div class="snippet-label">
+        03 — Bullet arc &amp; collision
+        <span>/ physics mechanic</span>
+      </div>
+      <pre><code class="language-javascript">const BULLET_GRAVITY_START = 400; // px of travel before drop kicks in
+const GRAVITY = 0.4;              // dy added per frame after threshold
+
+bullets = bullets.filter(b => {
+  b.travel += Math.abs(b.dx); // track horizontal distance covered
+
+  // Only apply gravity past 400px — short shots fly flat
+  if (b.travel > BULLET_GRAVITY_START) b.dy += GRAVITY;
+
+  b.x += b.dx;
+  b.y += b.dy;
+
+  // Out of bounds — remove
+  if (b.y > SH || b.x < 0 || b.x > WORLD_W) return false;
+
+  // AABB hit detection
+  function rectCollide(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x
+        && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  if (b.owner === 'yellow' &amp;&amp; rectCollide(b, red)) {
+    health.red -= 10 * effects.yellow.damage; // damage powerup multiplier
+    return false;
+  }
+  if (b.owner === 'red' &amp;&amp; rectCollide(b, yellow)) {
+    health.yellow -= 10 * effects.red.damage;
+    return false;
+  }
+
+  return true; // bullet survives this frame
+});</code></pre>
+      <p class="snippet-desc">
+        Bullets travel flat for the first 400 px, then arc downward — rewarding long-range
+        skill shots while keeping close combat snappy. AABB collision keeps it O(n) and accurate
+        at the game's small bullet sizes.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- SECTION 3 — PLAY NOW -->
+<div class="play-section">
+  <div class="container">
+    <h2>Ready to play?</h2>
+    <p>Challenge the AI or go head-to-head with a friend on the same keyboard.</p>
+    <div class="btn-hud-wrap">
+      <a href="TankBattle.html" class="btn-hud">PLAY NOW</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>© 2026 Dragos Patca &nbsp;·&nbsp; Built with vanilla JS + Canvas API</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+</html>
