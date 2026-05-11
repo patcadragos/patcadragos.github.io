@@ -577,7 +577,7 @@ async function mainMenu() {
         const opt = options[selected];
         if (opt==='1 PLAYER') { resolve('AI');  return; }
         if (opt==='2 PLAYER') { resolve('PVP'); return; }
-        if (opt==='QUIT')     { ctx.fillStyle='rgb(20,20,20)'; ctx.fillRect(0,0,SW,SH); return; }
+        if (opt==='QUIT')     { stopMusic(); window.location.href = 'index.html'; return; }
       }
       pUp=upNow; pDown=downNow; pEnter=enterNow;
       setTimeout(tick, 1000/FPS);
@@ -593,7 +593,7 @@ async function mainMenu() {
           canvas.removeEventListener('click', onTap);
           if (opt==='1 PLAYER') resolve('AI');
           if (opt==='2 PLAYER') resolve('PVP');
-          if (opt==='QUIT') { ctx.fillStyle='rgb(20,20,20)'; ctx.fillRect(0,0,SW,SH); }
+          if (opt==='QUIT') { stopMusic(); window.location.href = 'index.html'; }
         }
       });
       e.preventDefault();
@@ -1060,9 +1060,9 @@ async function main() {
     stopMusic();
     const result = await gameCompleted();
     if (result==='quit') {
-      ctx.fillStyle='rgb(0,0,0)'; ctx.fillRect(0,0,SW,SH);
-      fillText('Thanks for playing!', SW/2, SH/2-20, '#fff', 28, 'center', 'Arial');
-      break;
+      stopMusic();
+      window.location.href = 'index.html';
+      return;
     }
     // 'restart' → loop back to mainMenu
   }
