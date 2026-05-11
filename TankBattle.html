@@ -9,45 +9,141 @@
 <title>Tank Duel</title>
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+  /* ── Portfolio design tokens ── */
+  :root {
+    --accent:      #FF6B00;
+    --accent-dark: #d45a00;
+    --accent-lt:   #ff7d1a;
+    --bg:          #0a0a0a;
+    --text-sec:    #b8b8b8;
+    --border:      rgba(255,107,0,0.2);
+    --border-lt:   rgba(255,107,0,0.1);
+    --shell-h:     52px;
+  }
+
   * { margin:0; padding:0; box-sizing:border-box; }
   html { overflow:hidden; }
   body {
-    background:#000;
+    background:
+      radial-gradient(circle at 15% 50%, rgba(255,107,0,0.07) 0%, transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(255,107,0,0.05) 0%, transparent 45%),
+      #0a0a0a;
     width:100vw; height:100vh;
     overflow:hidden;
     overflow-x:hidden;
     touch-action:none;
     position:relative;
-    font-family:'Orbitron', monospace;
+    font-family:'DM Sans', sans-serif;
   }
+
+  /* ── Ambient blurred bg ── */
+  #bgc {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    z-index:-1;
+    filter:blur(32px) brightness(0.18) saturate(1.6);
+    transform:scale(1.12);
+    transform-origin:center;
+    will-change:transform;
+  }
+  #vignette {
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background:radial-gradient(ellipse 78% 70% at 50% 55%, transparent 10%, rgba(0,0,0,0.9) 100%);
+    pointer-events:none;
+  }
+
+  /* ── Shell header ── */
+  #shell-header {
+    position:fixed;
+    top:0; left:0; right:0;
+    height:var(--shell-h);
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 1.5rem;
+    background:rgba(10,10,10,0.92);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  .shell-title {
+    position:absolute;
+    left:50%; transform:translateX(-50%);
+    font-family:'Bebas Neue', sans-serif;
+    font-size:1.4rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    background:linear-gradient(135deg, var(--accent), var(--accent-lt));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  .back-btn {
+    display:inline-flex;
+    align-items:center;
+    gap:0.45rem;
+    padding:0.42rem 1.1rem;
+    font-family:'DM Sans', sans-serif;
+    font-size:0.78rem;
+    font-weight:600;
+    letter-spacing:0.07em;
+    text-transform:uppercase;
+    text-decoration:none;
+    color:var(--accent);
+    border:1.5px solid var(--accent);
+    background:transparent;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    transition:color 0.25s ease;
+    flex-shrink:0;
+    z-index:1;
+  }
+  .back-btn::before {
+    content:'';
+    position:absolute;
+    top:0; left:-100%;
+    width:100%; height:100%;
+    background:var(--accent);
+    z-index:-1;
+    transition:left 0.25s ease;
+  }
+  .back-btn:hover { color:#0a0a0a; }
+  .back-btn:hover::before { left:0; }
+
+  /* ── Mute button (lives inside header) ── */
+  #muteBtn {
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:rgba(20,20,20,0.8);
+    color:var(--text-sec);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.2s, color 0.2s, transform 0.1s;
+    padding:0;
+    flex-shrink:0;
+  }
+  #muteBtn:hover { background:rgba(255,107,0,0.15); color:#fff; transform:scale(1.08); }
+  #muteBtn:active { transform:scale(0.9); }
+
+  /* ── Game canvas wrap ── */
   #wrap {
     position:absolute;
     width:800px; height:600px;
     transform-origin:top left;
+    z-index:1;
   }
   canvas { display:block; width:800px; height:600px; }
-
-  /* ── Mute button ── */
-  #muteBtn {
-    position:fixed;
-    top:10px; right:10px;
-    z-index:300;
-    width:36px; height:36px;
-    border-radius:50%;
-    border:1px solid rgba(255,255,255,0.16);
-    background:rgba(0,0,0,0.6);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-    color:#fff;
-    cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    transition:background 0.12s, transform 0.1s;
-    padding:0;
-  }
-  #muteBtn:hover { background:rgba(55,55,55,0.75); transform:scale(1.1); }
-  #muteBtn:active { transform:scale(0.9); }
 
   /* ── Mobile controls ── */
   #mctrl {
@@ -74,10 +170,7 @@
     box-shadow:0 4px 20px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06);
     transition:background 0.07s, transform 0.07s;
   }
-  .mbtn:active {
-    background:rgba(72,72,72,0.82);
-    transform:scale(0.87);
-  }
+  .mbtn:active { background:rgba(72,72,72,0.82); transform:scale(0.87); }
   /* P1 — left cluster */
   #bRL { left:8px;  bottom:84px; }
   #bRR { left:80px; bottom:84px; }
@@ -109,10 +202,24 @@
     #bYR { right:4px;  bottom:86px; }
     #bYS { right:34px; bottom:14px; }
   }
+  @media (max-width:480px) {
+    .shell-title { display:none; }
+  }
 </style>
 </head>
 <body>
-<button id="muteBtn" aria-label="Toggle sound"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
+<canvas id="bgc"></canvas>
+<div id="vignette"></div>
+
+<header id="shell-header">
+  <a href="index.html" class="back-btn">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Projects
+  </a>
+  <span class="shell-title">Tank Duel</span>
+  <button id="muteBtn" aria-label="Toggle sound"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
+</header>
+
 <div id="wrap">
   <canvas id="c" width="800" height="600"></canvas>
   <div id="mctrl">
@@ -128,15 +235,46 @@
 <script>
 // ===================== SCALE WRAPPER =====================
 const wrap = document.getElementById('wrap');
+const SHELL_H = 52; // matches --shell-h in CSS
 function scaleWrap() {
-  const s = Math.min(window.innerWidth / 800, window.innerHeight / 600);
+  const availW = window.innerWidth;
+  const availH = window.innerHeight - SHELL_H;
+  const s = Math.min(availW / 800, availH / 600);
   const w = 800 * s, h = 600 * s;
   wrap.style.transform = `scale(${s})`;
-  wrap.style.left = `${(window.innerWidth  - w) / 2}px`;
-  wrap.style.top  = `${(window.innerHeight - h) / 2}px`;
+  wrap.style.left = `${(availW - w) / 2}px`;
+  wrap.style.top  = `${SHELL_H + (availH - h) / 2}px`;
 }
-window.addEventListener('resize', scaleWrap);
-window.addEventListener('orientationchange', () => setTimeout(scaleWrap, 150));
+
+// ===================== AMBIENT BACKGROUND =====================
+const bgcEl  = document.getElementById('bgc');
+const bgcCtx = bgcEl.getContext('2d');
+let currentAmbientKey = null;
+
+function updateAmbientBg(imgKey) {
+  const img = imgs[imgKey];
+  if (!img) return;
+  currentAmbientKey = imgKey;
+  // Half-res is fine — we're blurring 32px in CSS anyway
+  const bw = Math.ceil(window.innerWidth  / 2);
+  const bh = Math.ceil(window.innerHeight / 2);
+  if (bgcEl.width !== bw)  bgcEl.width  = bw;
+  if (bgcEl.height !== bh) bgcEl.height = bh;
+  const s = Math.max(bw / img.width, bh / img.height);
+  bgcCtx.drawImage(img,
+    Math.floor((bw - img.width  * s) / 2),
+    Math.floor((bh - img.height * s) / 2),
+    Math.ceil(img.width  * s),
+    Math.ceil(img.height * s)
+  );
+}
+
+function onResize() {
+  scaleWrap();
+  if (currentAmbientKey) updateAmbientBg(currentAmbientKey);
+}
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', () => setTimeout(onResize, 150));
 scaleWrap();
 
 // ===================== CONSTANTS (exact from Python) =====================
@@ -377,7 +515,7 @@ async function mainMenu() {
       const titleFont = ka1Loaded ? 'KA1' : 'Orbitron, Impact, Arial Black';
       ctx.save();
       ctx.shadowColor='rgba(255,30,30,0.75)'; ctx.shadowBlur=20;
-      fillText('TANK BATTLE', SW/2, 80, 'rgb(255,0,0)', 70, 'center', titleFont);
+      fillText('TANK DUEL', SW/2, 80, 'rgb(255,0,0)', 70, 'center', titleFont);
       ctx.restore();
 
       // Options: SysFont(None,36) ≈ Arial 28px (pygame size 36 ≈ 28px CSS)
@@ -573,7 +711,7 @@ async function runLevel(levelIdx, mode) {
     loadSfx('powerup', 'Assets/powerup.mp3'),
   ]);
 
-  // pygame.mixer.music.load("Assets/music.wav"); pygame.mixer.music.play(-1)
+  updateAmbientBg(`bg${levelIdx+1}`);
   playMusic('Assets/music.wav');
 
   // Show/hide yellow mobile buttons for 2P
