@@ -273,71 +273,125 @@
             background: rgba(255, 107, 0, 0.1);
         }
 
-        .pdf-viewer {
-            width: 100%;
-            height: 900px;
-            border: 1px solid rgba(255, 107, 0, 0.2);
-            border-radius: 6px;
-            margin: 2rem 0;
-            display: block;
+        /* ── Horizontal photo gallery ── */
+        .pg-outer {
+            width: 100vw;
+            margin-left: calc(50% - 50vw);
+            margin-top: 2.5rem;
+            background: #080808;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
 
-        .pdf-mobile-notice {
-            display: none;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(255, 107, 0, 0.05));
-            border: 1px solid rgba(255, 107, 0, 0.2);
-            border-radius: 6px;
-            margin: 1rem 0 2rem;
-            color: #b8b8b8;
-            font-size: 0.95rem;
+        .pg-header {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2.2rem 2rem 1.4rem;
         }
 
-        .pdf-mobile-notice i {
-            font-size: 1.5rem;
-            color: #FF6B00;
+        .pg-header .section-header {
+            margin-bottom: 0;
+        }
+
+        .pg-wrap {
+            position: relative;
+        }
+
+        .pg-track {
+            display: flex;
+            gap: 3px;
+            overflow-x: scroll;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            cursor: grab;
+        }
+
+        .pg-track::-webkit-scrollbar { display: none; }
+        .pg-track.is-dragging { cursor: grabbing; scroll-behavior: auto; }
+
+        .pg-track img {
+            height: 500px;
+            width: auto;
             flex-shrink: 0;
+            display: block;
+            object-fit: contain;
+            background: #0d0d0d;
+            transition: transform 0.35s ease;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .pg-track img:hover { transform: scale(1.02); position: relative; z-index: 1; }
+
+        .pg-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(10, 10, 10, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.15s;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 0;
+        }
+
+        .pg-arrow:hover {
+            background: rgba(255, 107, 0, 0.22);
+            border-color: rgba(255, 107, 0, 0.55);
+            color: #fff;
+            transform: translateY(-50%) scale(1.08);
+        }
+
+        .pg-arrow:active { transform: translateY(-50%) scale(0.93); }
+        .pg-arrow-l { left: 0.75rem; }
+        .pg-arrow-r { right: 0.75rem; }
+
+        .pg-hint {
+            position: absolute;
+            bottom: 0.9rem;
+            right: 1.2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.14em;
+            color: rgba(255, 255, 255, 0.32);
+            pointer-events: none;
+            animation: pgHint 3.5s ease forwards;
+            animation-delay: 1s;
+            opacity: 0;
+        }
+
+        @keyframes pgHint {
+            0%   { opacity: 0; }
+            12%  { opacity: 1; }
+            78%  { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         @media (max-width: 768px) {
-            nav {
-                padding: 1rem 1.5rem;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            header.page-header {
-                padding: calc(60px + 3rem) 1.5rem 3rem;
-            }
-
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            header.page-header { padding: calc(60px + 3rem) 1.5rem 3rem; }
             h1 { font-size: 2rem; }
             h2 { font-size: 1.5rem; }
-
-            section {
-                padding: 3rem 1.5rem;
-            }
-
-            .pdf-viewer {
-                height: 450px !important;
-            }
-
-            .pdf-viewer-desktop {
-                display: none;
-            }
-
-            .pdf-mobile-notice {
-                display: flex !important;
-            }
+            section { padding: 3rem 1.5rem; }
+            .pg-track img { height: 280px; }
+            .pg-arrow { width: 38px; height: 38px; }
+            .pg-arrow-l { left: 0.4rem; }
+            .pg-arrow-r { right: 0.4rem; }
         }
 
         @media (max-width: 480px) {
-            .pdf-viewer {
-                height: 320px !important;
-            }
+            .pg-track img { height: 220px; }
         }
     </style>
 </head>
@@ -485,13 +539,44 @@
                 </a>
             </div>
 
-            <h3>View Full Documentation</h3>
-            <p>Access the embedded PDF viewer below to review the complete project presentation:</p>
-            <div class="pdf-mobile-notice">
-                <i class="fas fa-mobile-alt"></i>
-                <span>PDF viewer is not optimized for mobile. Use the download button above to view the full documentation.</span>
+            <!-- Full-width horizontal gallery (breaks out of .container) -->
+            <div class="pg-outer">
+                <div class="pg-header">
+                    <div class="section-header">
+                        <h2>// Project Photos</h2>
+                    </div>
+                </div>
+                <div class="pg-wrap">
+                    <button class="pg-arrow pg-arrow-l" aria-label="Scroll left">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <div class="pg-track" id="pgTrack">
+                        <img src="pdf_images/page_01.png" alt="Follice Box — slide 1" loading="lazy">
+                        <img src="pdf_images/page_02.png" alt="Follice Box — slide 2" loading="lazy">
+                        <img src="pdf_images/page_03.png" alt="Follice Box — slide 3" loading="lazy">
+                        <img src="pdf_images/page_04.png" alt="Follice Box — slide 4" loading="lazy">
+                        <img src="pdf_images/page_05.png" alt="Follice Box — slide 5" loading="lazy">
+                        <img src="pdf_images/page_06.png" alt="Follice Box — slide 6" loading="lazy">
+                        <img src="pdf_images/page_07.png" alt="Follice Box — slide 7" loading="lazy">
+                        <img src="pdf_images/page_08.png" alt="Follice Box — slide 8" loading="lazy">
+                        <img src="pdf_images/page_09.png" alt="Follice Box — slide 9" loading="lazy">
+                        <img src="pdf_images/page_10.png" alt="Follice Box — slide 10" loading="lazy">
+                        <img src="pdf_images/page_11.png" alt="Follice Box — slide 11" loading="lazy">
+                        <img src="pdf_images/page_12.png" alt="Follice Box — slide 12" loading="lazy">
+                        <img src="pdf_images/page_13.png" alt="Follice Box — slide 13" loading="lazy">
+                        <img src="pdf_images/page_14.png" alt="Follice Box — slide 14" loading="lazy">
+                        <img src="pdf_images/page_15.png" alt="Follice Box — slide 15" loading="lazy">
+                        <img src="pdf_images/page_16.png" alt="Follice Box — slide 16" loading="lazy">
+                        <img src="pdf_images/page_17.png" alt="Follice Box — slide 17" loading="lazy">
+                        <img src="pdf_images/page_18.png" alt="Follice Box — slide 18" loading="lazy">
+                        <img src="pdf_images/page_19.png" alt="Follice Box — slide 19" loading="lazy">
+                    </div>
+                    <button class="pg-arrow pg-arrow-r" aria-label="Scroll right">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <div class="pg-hint">scroll →</div>
+                </div>
             </div>
-            <iframe src="FOLLICE%20BOX.pdf" class="pdf-viewer" title="FOLLICE BOX PDF"></iframe>
         </section>
 
         <!-- PROJECT STATUS -->
@@ -517,5 +602,44 @@
     <footer>
         <p>© 2025 DRAGOS PATCA — Building machines that think.</p>
     </footer>
+
+<script>
+(function () {
+    var track  = document.getElementById('pgTrack');
+    var btnL   = document.querySelector('.pg-arrow-l');
+    var btnR   = document.querySelector('.pg-arrow-r');
+    if (!track) return;
+
+    function scrollAmt() { return Math.max(360, window.innerWidth * 0.55); }
+
+    btnL.addEventListener('click', function () {
+        track.scrollBy({ left: -scrollAmt(), behavior: 'smooth' });
+    });
+    btnR.addEventListener('click', function () {
+        track.scrollBy({ left:  scrollAmt(), behavior: 'smooth' });
+    });
+
+    /* Mouse drag-to-scroll */
+    var dragging = false, startX = 0, scrollStart = 0;
+
+    track.addEventListener('mousedown', function (e) {
+        dragging    = true;
+        startX      = e.pageX;
+        scrollStart = track.scrollLeft;
+        track.classList.add('is-dragging');
+    });
+
+    window.addEventListener('mouseup', function () {
+        dragging = false;
+        track.classList.remove('is-dragging');
+    });
+
+    window.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        e.preventDefault();
+        track.scrollLeft = scrollStart - (e.pageX - startX);
+    });
+})();
+</script>
 </body>
 </html>
