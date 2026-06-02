@@ -3,612 +3,1023 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HVS 420/240 — AI Vision QC Demo</title>
+<title>HVS 420/240 — Quality Control Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
+/* ── Exact palette from main_window.py ── */
 :root {
-  --bg:        #0d1117;
-  --bg2:       #111827;
-  --bg3:       #1a2535;
-  --border:    rgba(0,212,255,0.15);
-  --cyan:      #00d4ff;
-  --cyan-dim:  rgba(0,212,255,0.12);
-  --green:     #00ff88;
-  --red:       #ff3b5c;
-  --amber:     #f59e0b;
-  --gold:      #d4a017;
-  --text:      #e2e8f0;
-  --text-sec:  #64748b;
+  --bg:      #0D0D12;
+  --surf1:   #14141C;
+  --surf2:   #1C1C28;
+  --surf3:   #242438;
+  --border:  #2C2C44;
+  --blue:    #2A8FCC;
+  --blue-d:  #1E6FA8;
+  --blue-g:  #5BB5E0;
+  --pass:    #22C55E;
+  --fail:    #EF4444;
+  --amber:   #F59E0B;
+  --text1:   #F2F2F8;
+  --text2:   #8A8AAC;
+  --text3:   #484864;
 }
+
 * { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
+html, body { height:100%; overflow:hidden; }
+
 body {
   background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
+  color: var(--text1);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-/* ── NAV ── */
-nav {
-  position: fixed; top:0; left:0; right:0; z-index:100;
-  height:60px;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 2rem;
-  background: rgba(10,10,10,0.96);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(255,107,0,0.2);
-}
-.nav-brand {
-  font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:0.1em;
-  background:linear-gradient(135deg,#FF6B00,#ff7d1a);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.nav-back {
-  display:inline-flex; align-items:center; gap:0.4rem;
-  font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:600;
-  letter-spacing:0.07em; text-transform:uppercase;
-  color:#FF6B00; border:1.5px solid #FF6B00;
-  padding:0.38rem 1rem; text-decoration:none;
-  position:relative; overflow:hidden; transition:color 0.25s;
-}
-.nav-back::before {
-  content:''; position:absolute; top:0; left:-100%;
-  width:100%; height:100%; background:#FF6B00;
-  z-index:-1; transition:left 0.25s;
-}
-.nav-back:hover { color:#0a0a0a; }
-.nav-back:hover::before { left:0; }
-
-/* ── DEMO WRAPPER ── */
-.demo-page { padding-top:60px; }
-
-/* ── HVS HEADER BAR ── */
-.hvs-header {
-  background:#0d1117;
-  border-bottom:2px solid var(--cyan);
-  padding:0 1.5rem;
-  height:44px;
-  display:flex; align-items:center; justify-content:space-between;
-  flex-shrink:0;
-}
-.hvs-title {
-  font-family:'Space Mono',monospace;
-  font-size:0.82rem; letter-spacing:0.14em;
-  color:var(--cyan);
-}
-.hvs-header-right {
-  display:flex; align-items:center; gap:0.8rem;
-}
-.mock-badge {
-  padding:2px 10px; border-radius:20px;
-  background:var(--cyan-dim); border:1px solid rgba(0,212,255,0.4);
-  font-family:'Space Mono',monospace; font-size:0.65rem;
-  letter-spacing:0.1em; color:var(--cyan);
-}
-#liveClock {
-  font-family:'Space Mono',monospace; font-size:0.72rem;
-  color:var(--text-sec);
+/* ── HEADER (56px, exact from _build_header) ── */
+#hdr {
+  height: 56px;
+  min-height: 56px;
+  background: var(--surf1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px 0 12px;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-/* ── MAIN GRID ── */
-.hvs-body {
-  display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap:2px;
-  background:#000;
-  height:calc(100vh - 60px - 44px - 160px);
-  min-height:380px;
-}
-.hvs-panel {
-  background:var(--bg);
-  padding:1rem;
-  display:flex; flex-direction:column; gap:0.75rem;
-  overflow:hidden;
-}
-.panel-title {
-  font-family:'Space Mono',monospace;
-  font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase;
-  color:var(--cyan); padding-bottom:0.5rem;
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-}
-.fps-badge {
-  font-family:'Space Mono',monospace; font-size:0.62rem;
-  color:var(--green); letter-spacing:0.08em;
+.flame-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-/* ── CAMERA FEED ── */
-#cameraCanvas {
-  width:100%; flex:1;
-  border:1px solid var(--border);
-  background:#080d14;
-  display:block;
-  min-height:200px;
-}
-.capture-btn {
-  width:100%; padding:0.7rem;
-  background:linear-gradient(135deg,var(--cyan),#0099bb);
-  color:#000; font-family:'Space Mono',monospace;
-  font-size:0.75rem; font-weight:700; letter-spacing:0.1em;
-  border:none; cursor:pointer;
-  text-transform:uppercase;
-  transition:opacity 0.15s, transform 0.1s;
-}
-.capture-btn:hover { opacity:0.88; }
-.capture-btn:active { transform:scale(0.97); }
-.capture-btn:disabled { opacity:0.4; cursor:not-allowed; }
-
-/* ── RESULT PANEL ── */
-.result-box {
-  flex:1; display:flex; flex-direction:column; align-items:center;
-  justify-content:center; gap:0.6rem;
-  border:1px solid var(--border);
-  background:#080d14; padding:1rem;
-  transition:border-color 0.3s, box-shadow 0.3s;
-  position:relative;
-}
-.result-box.pass {
-  border-color:var(--green);
-  box-shadow:0 0 24px rgba(0,255,136,0.18), inset 0 0 24px rgba(0,255,136,0.04);
-}
-.result-box.fail {
-  border-color:var(--red);
-  box-shadow:0 0 24px rgba(255,59,92,0.22), inset 0 0 24px rgba(255,59,92,0.06);
-}
-.result-box.shake {
-  animation:shake 0.4s ease;
-}
-@keyframes shake {
-  0%,100%{transform:translateX(0)}
-  20%{transform:translateX(-6px)}
-  40%{transform:translateX(6px)}
-  60%{transform:translateX(-4px)}
-  80%{transform:translateX(4px)}
-}
-.result-verdict {
-  font-family:'Bebas Neue',sans-serif;
-  font-size:2.8rem; letter-spacing:0.12em;
-  transition:color 0.3s;
-}
-.result-verdict.pass { color:var(--green); }
-.result-verdict.fail { color:var(--red); }
-.result-verdict.idle { color:var(--text-sec); }
-.result-conf {
-  width:100%;
-  display:flex; flex-direction:column; gap:0.25rem;
-}
-.conf-label {
-  font-family:'Space Mono',monospace; font-size:0.62rem;
-  color:var(--text-sec); display:flex; justify-content:space-between;
-}
-.conf-bar-bg {
-  width:100%; height:6px; background:#1a2535; border-radius:3px; overflow:hidden;
-}
-.conf-bar-fill {
-  height:100%; background:var(--cyan); border-radius:3px;
-  transition:width 0.6s cubic-bezier(0.23,1,0.32,1);
-}
-.pins-display {
-  font-family:'Space Mono',monospace;
-  font-size:1rem; letter-spacing:0.08em;
-}
-.pins-display.ok { color:var(--green); }
-.pins-display.bad { color:var(--red); }
-.insp-time {
-  font-family:'Space Mono',monospace;
-  font-size:0.65rem; color:var(--text-sec);
-}
-.defect-list {
-  width:100%; display:flex; flex-direction:column; gap:0.25rem;
-  max-height:80px; overflow-y:auto;
-}
-.defect-item {
-  font-family:'Space Mono',monospace; font-size:0.62rem;
-  color:var(--red); padding:2px 6px;
-  background:rgba(255,59,92,0.08); border-left:2px solid var(--red);
+.flame-svg {
+  width: 32px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
-/* ── STATS PANEL ── */
-.stat-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0.4rem 0;
-  border-bottom:1px solid rgba(0,212,255,0.06);
-  font-size:0.85rem;
+.hdr-subtitle {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--blue-g);
+  white-space: nowrap;
 }
-.stat-label { color:var(--text-sec); font-size:0.8rem; }
-.stat-val {
-  font-family:'Space Mono',monospace; font-size:0.85rem;
-  color:var(--cyan);
+
+#hdrSpacer { flex: 1; }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  height: 22px;
+  min-width: 48px;
+  flex-shrink: 0;
 }
-.stat-val.green { color:var(--green); }
-.stat-val.red   { color:var(--red); }
+
+#hdrClock {
+  color: var(--text2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+/* ── TOOLBAR (58px, exact from _build_toolbar_widget) ── */
+#toolbar {
+  height: 58px;
+  min-height: 58px;
+  background: var(--surf1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.tb-btn {
+  width: 68px;
+  height: 50px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.tb-btn:hover { background: var(--surf3); color: var(--blue); }
+.tb-btn:hover .tb-icon { color: var(--blue); }
+.tb-btn:active { background: rgba(42,143,204,0.15); }
+.tb-btn.active { background: rgba(42,143,204,0.18); color: var(--blue); }
+.tb-btn.active .tb-icon { color: var(--blue); }
+
+.tb-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+  transition: color 0.15s;
+}
+.tb-btn:hover .tb-icon { color: var(--blue); }
+.tb-btn.active .tb-icon { color: var(--blue); }
+
+.tb-label {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--text3);
+  transition: color 0.15s;
+}
+.tb-btn:hover .tb-label { color: var(--blue-g); }
+.tb-btn.active .tb-label { color: var(--blue-g); }
+
+.tb-sep {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+#toolbarSpacer { flex: 1; }
+
+/* ── CONTENT AREA (3-column: 52/30/22) ── */
+#content {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── CARD (border-radius: 10px from _card()) ── */
+.card {
+  background: var(--surf1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ── PANEL TITLE BAR ── */
+.panel-title-bar {
+  height: 36px;
+  min-height: 36px;
+  background: var(--surf2);
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.panel-title-text {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text2);
+  flex: 1;
+}
+
+.fps-lbl {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--blue);
+}
+
+/* ── CAMERA PANEL (52%) ── */
+#panelCam { flex: 52; }
+
+.cam-wrap {
+  flex: 1;
+  position: relative;
+  background: #07070D;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#camVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#camCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.no-cam-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.no-cam-msg svg { opacity: 0.3; }
+
+/* ── RESULT PANEL (30%) ── */
+#panelResult { flex: 30; }
+
+.result-body {
+  flex: 1;
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.result-section-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.result-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 10px 0 16px;
+  flex-shrink: 0;
+}
+
+#resultVerdict {
+  font-size: clamp(42px, 6vw, 72px);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1;
+  color: var(--text3);
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+#defectLbl {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--fail);
+  min-height: 20px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.result-divider2 {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0 14px;
+  flex-shrink: 0;
+}
+
+.conf-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.conf-track {
+  height: 6px;
+  background: var(--surf3);
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.conf-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.5s cubic-bezier(0.23,1,0.32,1), background 0.3s;
+}
+
+#pinsLbl {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text1);
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+
+.result-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.result-bottom-row span {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text2);
+}
+
+.result-spacer { flex: 1; }
+
+/* ── STATS PANEL (22%) ── */
+#panelStats { flex: 22; }
+
+.stats-body {
+  flex: 1;
+  padding: 10px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.stats-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  padding-bottom: 4px;
+}
+
 .gauge-wrap {
-  display:flex; align-items:center; justify-content:center;
-  padding:0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  padding: 4px 0;
 }
-#gaugeCanvas { display:block; }
-.reset-btn {
-  width:100%; padding:0.5rem;
-  background:transparent; color:var(--text-sec);
-  border:1px solid rgba(100,116,139,0.3);
-  font-family:'Space Mono',monospace; font-size:0.65rem;
-  letter-spacing:0.1em; cursor:pointer; text-transform:uppercase;
-  transition:border-color 0.2s, color 0.2s;
-}
-.reset-btn:hover { border-color:var(--cyan); color:var(--cyan); }
 
-/* ── HISTORY TABLE ── */
-.history-panel {
-  background:var(--bg2);
-  border-top:2px solid var(--border);
-  height:160px;
-  overflow:hidden;
-  display:flex; flex-direction:column;
-}
-.history-header {
-  display:grid;
-  grid-template-columns:44px 1fr 80px 1fr 80px;
-  gap:0;
-  background:#0d1117;
-  border-bottom:1px solid var(--border);
-  padding:0 1rem;
-}
-.history-header span {
-  font-family:'Space Mono',monospace;
-  font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase;
-  color:var(--text-sec); padding:0.5rem 0;
-}
-.history-body {
-  flex:1; overflow-y:auto;
-  scrollbar-width:thin; scrollbar-color:rgba(0,212,255,0.2) transparent;
-}
-.history-body::-webkit-scrollbar { width:4px; }
-.history-body::-webkit-scrollbar-thumb { background:rgba(0,212,255,0.2); }
-.history-row {
-  display:grid;
-  grid-template-columns:44px 1fr 80px 1fr 80px;
-  gap:0;
-  padding:0 1rem;
-  border-bottom:1px solid rgba(0,212,255,0.04);
-  animation:rowIn 0.25s ease;
-}
-@keyframes rowIn {
-  from{opacity:0;transform:translateY(-8px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.history-row span {
-  font-family:'Space Mono',monospace;
-  font-size:0.62rem; color:var(--text-sec);
-  padding:0.42rem 0; display:flex; align-items:center;
-}
-.pill {
-  display:inline-block; padding:1px 7px; border-radius:10px;
-  font-size:0.58rem; font-family:'Space Mono',monospace;
-  letter-spacing:0.08em;
-}
-.pill.pass { background:rgba(0,255,136,0.12); color:var(--green); border:1px solid rgba(0,255,136,0.3); }
-.pill.fail { background:rgba(255,59,92,0.12); color:var(--red);   border:1px solid rgba(255,59,92,0.3); }
+#gaugeCanvas { display: block; }
 
-/* ── SCANNING OVERLAY ── */
-.scanning-overlay {
-  display:none; position:absolute; inset:0;
-  background:rgba(0,212,255,0.06);
-  pointer-events:none;
+/* MetricCard — exact from MetricCard widget */
+.metric-card {
+  height: 52px;
+  min-height: 52px;
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px 0 16px;
+  gap: 0;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
 }
-.scanning-overlay.active { display:block; animation:scanPulse 0.8s ease; }
-@keyframes scanPulse {
-  0%{background:rgba(0,212,255,0.0)}
-  40%{background:rgba(0,212,255,0.12)}
-  100%{background:rgba(0,212,255,0.0)}
+
+.metric-stripe {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 3px;
+  border-radius: 2px;
+  bottom: 12px;
 }
+
+.metric-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.metric-val {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.metric-lbl {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+
+/* ── HISTORY PANEL ── */
+#historyPanel {
+  background: var(--surf1);
+  border-top: 1px solid var(--border);
+  height: 158px;
+  min-height: 158px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.hist-header {
+  padding: 8px 12px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+
+.hist-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #2C2C44 transparent;
+}
+
+.hist-table-wrap::-webkit-scrollbar { width: 6px; }
+.hist-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.hist-table-wrap::-webkit-scrollbar-thumb:hover { background: var(--blue); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+thead th {
+  background: var(--surf2);
+  color: var(--text2);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+tbody tr {
+  border-bottom: 1px solid rgba(44,44,68,0.5);
+  transition: background 0.1s;
+}
+tbody tr:nth-child(odd) { background: rgba(28,28,40,0.5); }
+tbody tr:hover { background: var(--surf3); }
+
+tbody td {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.td-result-pass { color: var(--pass); font-weight: 700; }
+.td-result-fail { color: var(--fail); font-weight: 700; }
+
+.row-pass { background: rgba(34,197,94,0.04) !important; }
+.row-fail { background: rgba(239,68,68,0.04) !important; }
+
+/* ── SCANNING FLASH ── */
+@keyframes scanFlash {
+  0%,100%{ opacity:0; }
+  15%    { opacity:1; }
+  85%    { opacity:1; }
+}
+
+/* ── NAV LINK (top-right) ── */
+#backNav {
+  position: fixed;
+  bottom: 12px;
+  right: 14px;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(20,20,28,0.9);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+  backdrop-filter: blur(8px);
+}
+#backNav:hover { border-color: var(--blue); color: var(--blue); }
+
+/* ── COL WIDTHS ── */
+th:nth-child(1), td:nth-child(1) { width: 72px; }
+th:nth-child(2), td:nth-child(2) { width: 64px; }
+th:nth-child(3), td:nth-child(3) { width: auto; }
+th:nth-child(4), td:nth-child(4) { width: 84px; }
+th:nth-child(5), td:nth-child(5) { width: 68px; }
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  .hvs-body{
-    grid-template-columns:1fr 1fr;
-    height:auto;
-  }
-  .panel-stats{grid-column:span 2;}
-  .history-header,.history-row{
-    grid-template-columns:36px 1fr 66px 1fr 60px;
-  }
-}
-@media(max-width:600px){
-  .hvs-body{grid-template-columns:1fr; height:auto;}
-  .panel-stats{grid-column:span 1;}
+  html,body{height:auto; overflow:auto;}
+  #content{flex-direction:column; overflow:visible;}
+  #panelCam,#panelResult,#panelStats{flex:none; height:300px;}
+  #historyPanel{height:auto; min-height:200px;}
+  body{overflow-y:auto;}
 }
 </style>
 </head>
 <body>
 
-<!-- PORTFOLIO NAV -->
-<nav>
-  <a href="index.html" class="nav-brand">DRAGOS</a>
-  <a href="index.html#projects" class="nav-back">
-    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    Back to Projects
-  </a>
-</nav>
+<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+<div id="hdr">
+  <!-- Flacara Electric flame logo drawn as SVG -->
+  <div class="flame-logo">
+    <svg class="flame-svg" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 2C16 2 8 10 8 20C8 24 10 26 12 27C11 24 12 21 14 19C14 23 15 26 16 28C17 26 18 23 18 19C20 21 21 24 20 27C22 26 24 24 24 20C24 10 16 2 16 2Z" fill="#2A8FCC"/>
+      <path d="M16 22C16 22 13 26 14 30C14.8 33 16 35 16 38C16 38 18 35 18.2 30C19 26 16 22 16 22Z" fill="#5BB5E0"/>
+    </svg>
+    <div class="hdr-subtitle">HVS 420 / 240 &nbsp;·&nbsp; QUALITY CONTROL</div>
+  </div>
 
-<div class="demo-page">
+  <div id="hdrSpacer"></div>
 
-  <!-- HVS APP HEADER -->
-  <div class="hvs-header">
-    <div class="hvs-title">HVS 420/240 &nbsp;·&nbsp; QUALITY CONTROL SYSTEM</div>
-    <div class="hvs-header-right">
-      <span class="mock-badge">MOCK MODE</span>
-      <span id="liveClock">00:00:00</span>
+  <!-- Engine badge -->
+  <div class="status-pill" id="enginePill"
+       style="background:rgba(245,158,11,0.2); color:#F59E0B; border:1px solid rgba(245,158,11,0.35);">
+    MOCK
+  </div>
+
+  <!-- Source badge -->
+  <div class="status-pill" id="sourcePill"
+       style="margin-left:10px; background:rgba(72,72,100,0.3); color:var(--text3); border:1px solid var(--border);">
+    IDLE
+  </div>
+
+  <div id="hdrClock">00:00:00</div>
+</div>
+
+<!-- ══ TOOLBAR ═════════════════════════════════════════════════════════════ -->
+<div id="toolbar">
+
+  <button class="tb-btn" id="btnCamera" onclick="toggleCamera()" title="Start / Stop Camera">
+    <span class="tb-icon" id="camIcon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+      </svg>
+    </span>
+    <span class="tb-label">Camera</span>
+  </button>
+
+  <button class="tb-btn" title="Load Image" onclick="loadImage()">
+    <span class="tb-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </span>
+    <span class="tb-label">Load Image</span>
+  </button>
+
+  <div class="tb-sep"></div>
+
+  <button class="tb-btn" title="Reset statistics" onclick="resetStats()">
+    <span class="tb-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <polyline points="1 4 1 10 7 10"/>
+        <path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
+      </svg>
+    </span>
+    <span class="tb-label">Reset</span>
+  </button>
+
+  <button class="tb-btn" title="Export CSV (demo)" onclick="exportCSV()">
+    <span class="tb-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </span>
+    <span class="tb-label">Export CSV</span>
+  </button>
+
+  <div id="toolbarSpacer"></div>
+
+  <div class="tb-btn" style="cursor:default; width:auto; padding:0 10px;">
+    <span style="font-size:10px; color:var(--text3); letter-spacing:0.4px;">DEMO MODE — browser simulation</span>
+  </div>
+
+</div>
+
+<!-- ══ CONTENT (52 / 30 / 22) ══════════════════════════════════════════════ -->
+<div id="content">
+
+  <!-- ── CAMERA PANEL (52) ── -->
+  <div class="card" id="panelCam">
+    <div class="panel-title-bar">
+      <span class="panel-title-text">Camera Feed</span>
+      <span class="fps-lbl" id="fpsLbl">FPS —</span>
+    </div>
+    <div class="cam-wrap" id="camWrap">
+      <!-- Real video element -->
+      <video id="camVideo" autoplay muted playsinline></video>
+      <!-- Detection overlay canvas -->
+      <canvas id="camCanvas"></canvas>
+      <!-- No-camera fallback -->
+      <div class="no-cam-msg" id="noCamMsg">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+        <span>Camera not started</span>
+        <span style="font-size:11px; color:var(--text3);">Click "Camera" in the toolbar to begin</span>
+      </div>
     </div>
   </div>
 
-  <!-- 3-COLUMN MAIN GRID -->
-  <div class="hvs-body">
-
-    <!-- PANEL 1: CAMERA FEED -->
-    <div class="hvs-panel panel-camera">
-      <div class="panel-title">
-        Camera Feed
-        <span class="fps-badge" id="fpsBadge">▶ 30 FPS</span>
-      </div>
-      <canvas id="cameraCanvas"></canvas>
-      <button class="capture-btn" id="captureBtn">⬡ Capture &amp; Inspect</button>
+  <!-- ── RESULT PANEL (30) ── -->
+  <div class="card" id="panelResult">
+    <div class="panel-title-bar">
+      <span class="panel-title-text">Inspection Result</span>
     </div>
+    <div class="result-body">
+      <div class="result-section-lbl">INSPECTION RESULT</div>
+      <div class="result-divider"></div>
 
-    <!-- PANEL 2: INSPECTION RESULT -->
-    <div class="hvs-panel panel-result">
-      <div class="panel-title">Inspection Result</div>
-      <div class="result-box" id="resultBox">
-        <div class="scanning-overlay" id="scanOverlay"></div>
-        <div class="result-verdict idle" id="resultVerdict">READY</div>
-        <div class="conf-label" style="width:100%">
-          <span>Confidence</span>
-          <span id="confPct">—</span>
-        </div>
-        <div class="result-conf">
-          <div class="conf-bar-bg">
-            <div class="conf-bar-fill" id="confBar" style="width:0%"></div>
-          </div>
-        </div>
-        <div class="pins-display ok" id="pinsDisplay">— / 20 PINS</div>
-        <div class="insp-time" id="inspTime">Awaiting inspection</div>
-        <div class="defect-list" id="defectList"></div>
+      <div id="resultVerdict">WAITING</div>
+      <div id="defectLbl"></div>
+
+      <div class="result-divider2"></div>
+
+      <div class="conf-row">
+        <span id="confLabel">Confidence</span>
+        <span id="confPct">—</span>
+      </div>
+      <div class="conf-track">
+        <div class="conf-fill" id="confFill"></div>
+      </div>
+
+      <div id="pinsLbl">Pins — / —</div>
+
+      <div class="result-spacer"></div>
+
+      <div class="result-bottom-row">
+        <span id="timeLbl">— ms</span>
+        <span id="engineLbl">[ MOCK ]</span>
       </div>
     </div>
+  </div>
 
-    <!-- PANEL 3: STATISTICS -->
-    <div class="hvs-panel panel-stats">
-      <div class="panel-title">Statistics</div>
+  <!-- ── STATS PANEL (22) ── -->
+  <div class="card" id="panelStats">
+    <div class="stats-body">
+      <div class="stats-title">Statistics</div>
+
       <div class="gauge-wrap">
-        <canvas id="gaugeCanvas" width="110" height="110"></canvas>
+        <canvas id="gaugeCanvas"></canvas>
       </div>
-      <div class="stat-row">
-        <span class="stat-label">Total Inspections</span>
-        <span class="stat-val" id="statTotal">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Passed</span>
-        <span class="stat-val green" id="statPassed">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Failed</span>
-        <span class="stat-val red" id="statFailed">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Avg. Confidence</span>
-        <span class="stat-val" id="statConf">—</span>
-      </div>
-      <button class="reset-btn" id="resetBtn">↺ Reset Statistics</button>
-    </div>
 
-  </div><!-- /hvs-body -->
+      <div class="metric-card">
+        <div class="metric-stripe" style="background:var(--blue)"></div>
+        <div class="metric-inner">
+          <div class="metric-val" id="mcTotal" style="color:var(--blue)">0</div>
+          <div class="metric-lbl">Total Inspected</div>
+        </div>
+      </div>
 
-  <!-- HISTORY TABLE -->
-  <div class="history-panel">
-    <div class="history-header">
-      <span>#</span>
-      <span>Time</span>
-      <span>Result</span>
-      <span>Defects</span>
-      <span>Conf</span>
+      <div class="metric-card">
+        <div class="metric-stripe" style="background:var(--pass)"></div>
+        <div class="metric-inner">
+          <div class="metric-val" id="mcPass" style="color:var(--pass)">0</div>
+          <div class="metric-lbl">Passed</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-stripe" style="background:var(--fail)"></div>
+        <div class="metric-inner">
+          <div class="metric-val" id="mcFail" style="color:var(--fail)">0</div>
+          <div class="metric-lbl">Failed</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-stripe" style="background:var(--text3)"></div>
+        <div class="metric-inner">
+          <div class="metric-val" id="mcConf" style="color:var(--text2)">—</div>
+          <div class="metric-lbl">Avg Confidence</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-stripe" style="background:var(--text3)"></div>
+        <div class="metric-inner">
+          <div class="metric-val" id="mcTime" style="color:var(--text2)">—</div>
+          <div class="metric-lbl">Avg Time</div>
+        </div>
+      </div>
+
     </div>
-    <div class="history-body" id="historyBody"></div>
   </div>
 
-</div><!-- /demo-page -->
+</div><!-- /content -->
+
+<!-- ══ HISTORY PANEL ════════════════════════════════════════════════════════ -->
+<div id="historyPanel">
+  <div class="hist-header">Inspection History</div>
+  <div class="hist-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Result</th>
+          <th>Defects</th>
+          <th>Confidence</th>
+          <th>Engine</th>
+        </tr>
+      </thead>
+      <tbody id="histBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Back link -->
+<a id="backNav" href="index.html#projects">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+  Back to Portfolio
+</a>
+
+<!-- Hidden file input for Load Image -->
+<input type="file" id="fileInput" accept="image/*" style="display:none">
 
 <script>
 'use strict';
 
 // ── State ──────────────────────────────────────────────────────────────────
-var stats = { total:0, passed:0, failed:0, confSum:0 };
+var stats   = { total:0, passed:0, failed:0, confSum:0, timeSum:0 };
 var history = [];
-var inspecting = false;
-var autoTimer = null;
+var stream  = null;
+var cameraRunning = false;
+var inspecting    = false;
+var autoTimer     = null;
+var lastFrameTime = 0;
+var frameCount    = 0;
+var fpsDisplay    = 0;
+var animRafId     = null;
+
+// Current detection state (drawn on overlay canvas)
+var detection = {
+  active: false,
+  isPass: true,
+  conf: 0,
+  boxes: [],
+  scanY: 0,
+  scanDir: 1,
+  flash: 0,
+  missingPins: []
+};
 
 var DEFECTS = [
-  'Missing pin #7','Missing pin #12','Missing pin #3','Missing pin #17',
-  'Scratch on housing','Missing locking ring',
-  'Orientation: 180°','Deformation on entry port',
-  'Missing sealing ring','Missing pin #19'
+  'Missing pin #7', 'Missing pin #12', 'Missing pin #3', 'Missing pin #17',
+  'Scratch on housing', 'Missing locking ring',
+  'Orientation: 180°', 'Deformation on entry port',
+  'Missing sealing ring', 'Missing pin #19'
 ];
 
 // ── Clock ──────────────────────────────────────────────────────────────────
 function updateClock() {
-  var now = new Date();
-  document.getElementById('liveClock').textContent =
-    [now.getHours(),now.getMinutes(),now.getSeconds()]
-      .map(function(n){return ('0'+n).slice(-2);}).join(':');
+  var d = new Date();
+  document.getElementById('hdrClock').textContent =
+    [d.getHours(), d.getMinutes(), d.getSeconds()]
+      .map(function(n){ return ('0'+n).slice(-2); }).join(':');
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// ── Camera canvas ─────────────────────────────────────────────────────────
-var camCanvas = document.getElementById('cameraCanvas');
-var camCtx    = camCanvas.getContext('2d');
-var scanLineY = 0;
-var scanDir   = 1;
-var animFrame = 0;
+// ── Gauge ──────────────────────────────────────────────────────────────────
+function drawGauge(pct) {
+  var c = document.getElementById('gaugeCanvas');
+  var p = c.getContext('2d');
+  var size = Math.min(c.parentElement.clientWidth - 16, c.parentElement.clientHeight - 8);
+  size = Math.max(60, Math.min(size, 160));
+  c.width = size; c.height = size;
+  var cx = size/2, cy = size/2, r = size*0.40, lw = Math.max(7, size*0.09);
+  p.clearRect(0,0,size,size);
 
-function resizeCam() {
-  var rect = camCanvas.parentElement.getBoundingClientRect();
-  camCanvas.width  = Math.floor(rect.width - 32);
-  camCanvas.height = Math.floor(camCanvas.width * 0.78);
-}
+  // track
+  p.beginPath(); p.arc(cx,cy,r, 0.75*Math.PI, 2.25*Math.PI);
+  p.strokeStyle='#242438'; p.lineWidth=lw; p.lineCap='round'; p.stroke();
 
-function drawConnector(ctx, cx, cy, r, frame, missingPins) {
-  missingPins = missingPins || [];
-
-  // Background
-  ctx.fillStyle = '#080d14';
-  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-  // Grid
-  ctx.strokeStyle = 'rgba(0,212,255,0.05)';
-  ctx.lineWidth = 1;
-  var step = 24;
-  for(var x=0;x<ctx.canvas.width;x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,ctx.canvas.height); ctx.stroke(); }
-  for(var y=0;y<ctx.canvas.height;y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(ctx.canvas.width,y); ctx.stroke(); }
-
-  // Outer housing
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(42,53,69,1)'; ctx.lineWidth=r*0.10;
-  ctx.stroke();
-
-  // Locking ring notches (4 positions)
-  [[0],[90],[180],[270]].forEach(function(arr){
-    var a = arr[0]*Math.PI/180;
-    var nx=cx+Math.cos(a)*(r*1.08), ny=cy+Math.sin(a)*(r*1.08);
-    ctx.beginPath(); ctx.arc(nx,ny,r*0.06,0,Math.PI*2);
-    ctx.fillStyle='#1e2d42'; ctx.fill();
-    ctx.strokeStyle='rgba(0,212,255,0.5)'; ctx.lineWidth=1.2; ctx.stroke();
-  });
-
-  // Inner amber ring
-  ctx.beginPath(); ctx.arc(cx,cy,r*0.78,0,Math.PI*2);
-  ctx.strokeStyle='rgba(200,117,10,0.9)'; ctx.lineWidth=r*0.07; ctx.stroke();
-
-  // Inner fill
-  ctx.beginPath(); ctx.arc(cx,cy,r*0.74,0,Math.PI*2);
-  ctx.fillStyle='#0f1820'; ctx.fill();
-
-  // Center body
-  ctx.beginPath(); ctx.arc(cx,cy,r*0.38,0,Math.PI*2);
-  ctx.fillStyle='#1a2535'; ctx.fill();
-  ctx.strokeStyle='#2a3a52'; ctx.lineWidth=1.5; ctx.stroke();
-
-  // Center label
-  ctx.fillStyle='rgba(0,212,255,0.6)';
-  ctx.font='bold '+(r*0.115)+'px Space Mono,monospace';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('HVS', cx, cy-r*0.06);
-  ctx.font=(r*0.09)+'px Space Mono,monospace';
-  ctx.fillStyle='rgba(0,212,255,0.35)';
-  ctx.fillText('420/240', cx, cy+r*0.1);
-
-  // 20 pins
-  var pinR = r * 0.58;
-  var pinSize = r * 0.055;
-  for(var i=0;i<20;i++){
-    var angle = (i/20)*Math.PI*2 - Math.PI/2;
-    var px = cx + Math.cos(angle)*pinR;
-    var py = cy + Math.sin(angle)*pinR;
-    var missing = missingPins.indexOf(i+1) !== -1;
-    if(missing){
-      ctx.beginPath(); ctx.arc(px,py,pinSize,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,59,92,0.15)'; ctx.fill();
-      ctx.strokeStyle='rgba(255,59,92,0.6)'; ctx.lineWidth=1.2; ctx.stroke();
-      // X mark
-      ctx.strokeStyle='rgba(255,59,92,0.8)'; ctx.lineWidth=1;
-      var s=pinSize*0.55;
-      ctx.beginPath(); ctx.moveTo(px-s,py-s); ctx.lineTo(px+s,py+s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(px+s,py-s); ctx.lineTo(px-s,py+s); ctx.stroke();
-    } else {
-      ctx.beginPath(); ctx.arc(px,py,pinSize,0,Math.PI*2);
-      ctx.fillStyle='#c8920a'; ctx.fill();
-      ctx.strokeStyle='#f0c040'; ctx.lineWidth=1.2; ctx.stroke();
-      // highlight
-      ctx.beginPath(); ctx.arc(px-pinSize*0.3,py-pinSize*0.3,pinSize*0.3,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,228,96,0.45)'; ctx.fill();
-    }
+  // fill: hue 20 (red) → 120 (green)
+  if(pct>0) {
+    var hue = Math.round(20 + 100*pct/100);
+    var end = 0.75*Math.PI + (pct/100)*1.5*Math.PI;
+    p.beginPath(); p.arc(cx,cy,r, 0.75*Math.PI, end);
+    p.strokeStyle = 'hsl('+hue+',78%,52%)';
+    p.lineWidth=lw; p.lineCap='round'; p.stroke();
   }
 
-  // Scan line
-  ctx.strokeStyle='rgba(0,212,255,0.35)';
-  ctx.lineWidth=1.5;
-  ctx.setLineDash([4,8]);
-  ctx.beginPath(); ctx.moveTo(cx-r,scanLineY); ctx.lineTo(cx+r,scanLineY);
+  // text
+  p.fillStyle='#F2F2F8'; p.textAlign='center'; p.textBaseline='middle';
+  p.font='bold '+Math.round(size*0.17)+'px "Segoe UI",system-ui,sans-serif';
+  p.fillText(pct.toFixed(1)+'%', cx, cy-size*0.04);
+  p.font=Math.round(size*0.09)+'px "Segoe UI",system-ui,sans-serif';
+  p.fillStyle='#8A8AAC';
+  p.fillText('PASS RATE', cx, cy+size*0.14);
+}
+
+// ── Camera ─────────────────────────────────────────────────────────────────
+function toggleCamera() {
+  if(cameraRunning) {
+    stopCamera();
+  } else {
+    startCamera();
+  }
+}
+
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+  .catch(function() {
+    return navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  })
+  .then(function(s) {
+    stream = s;
+    var vid = document.getElementById('camVideo');
+    vid.srcObject = s;
+    vid.play();
+    cameraRunning = true;
+    document.getElementById('noCamMsg').style.display = 'none';
+    setSourcePill('LIVE', 'var(--pass)', 'rgba(34,197,94,0.15)', 'rgba(34,197,94,0.4)');
+    document.getElementById('btnCamera').classList.add('active');
+    // Update icon to stop
+    document.getElementById('camIcon').innerHTML =
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+    startFPSCounter();
+    scheduleAuto();
+  })
+  .catch(function(err) {
+    alert('Camera access denied or unavailable.\n\nYou can still use the demo — auto-inspection runs in mock mode.\n\n' + err.message);
+    // Run mock mode without camera
+    cameraRunning = false;
+    setSourcePill('MOCK', 'var(--amber)', 'rgba(245,158,11,0.12)', 'rgba(245,158,11,0.35)');
+    scheduleAuto();
+  });
+}
+
+function stopCamera() {
+  if(stream) {
+    stream.getTracks().forEach(function(t){ t.stop(); });
+    stream = null;
+  }
+  var vid = document.getElementById('camVideo');
+  vid.srcObject = null;
+  cameraRunning = false;
+  document.getElementById('noCamMsg').style.display = 'flex';
+  setSourcePill('IDLE', 'var(--text3)', 'rgba(72,72,100,0.3)', 'var(--border)');
+  document.getElementById('btnCamera').classList.remove('active');
+  document.getElementById('camIcon').innerHTML =
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>';
+  clearTimeout(autoTimer);
+  stopFPSCounter();
+}
+
+function setSourcePill(text, color, bg, border) {
+  var p = document.getElementById('sourcePill');
+  p.textContent = text;
+  p.style.color = color;
+  p.style.background = bg;
+  p.style.borderColor = border;
+}
+
+// ── FPS counter ───────────────────────────────────────────────────────────
+function startFPSCounter() {
+  if(animRafId) cancelAnimationFrame(animRafId);
+  lastFrameTime = performance.now();
+  frameCount = 0;
+  function tick(now) {
+    frameCount++;
+    if(now - lastFrameTime >= 1000) {
+      fpsDisplay = frameCount;
+      frameCount = 0;
+      lastFrameTime = now;
+      document.getElementById('fpsLbl').textContent = 'FPS ' + fpsDisplay.toFixed(0);
+    }
+    drawOverlay();
+    animRafId = requestAnimationFrame(tick);
+  }
+  animRafId = requestAnimationFrame(tick);
+}
+
+function stopFPSCounter() {
+  if(animRafId) { cancelAnimationFrame(animRafId); animRafId = null; }
+  document.getElementById('fpsLbl').textContent = 'FPS —';
+}
+
+// ── Overlay canvas ────────────────────────────────────────────────────────
+function drawOverlay() {
+  var wrap  = document.getElementById('camWrap');
+  var cnv   = document.getElementById('camCanvas');
+  var video = document.getElementById('camVideo');
+
+  cnv.width  = wrap.clientWidth;
+  cnv.height = wrap.clientHeight;
+
+  var ctx = cnv.getContext('2d');
+  ctx.clearRect(0,0,cnv.width,cnv.height);
+
+  // Scan line (always shown when camera active)
+  detection.scanY += detection.scanDir * 1.5;
+  if(detection.scanY > cnv.height || detection.scanY < 0) detection.scanDir *= -1;
+
+  ctx.strokeStyle = 'rgba(42,143,204,0.22)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([8, 12]);
+  ctx.beginPath();
+  ctx.moveTo(0, detection.scanY);
+  ctx.lineTo(cnv.width, detection.scanY);
   ctx.stroke();
   ctx.setLineDash([]);
 
   // Corner reticles
-  var m=10, s2=18;
-  ctx.strokeStyle='rgba(0,212,255,0.5)'; ctx.lineWidth=1.5;
-  [[m,m],[ctx.canvas.width-m,m],[m,ctx.canvas.height-m],[ctx.canvas.width-m,ctx.canvas.height-m]]
-  .forEach(function(pt,idx){
-    var x=pt[0],y=pt[1];
-    var dx=(idx%2===0)?1:-1, dy=(idx<2)?1:-1;
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx*s2,y); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+dy*s2); ctx.stroke();
-  });
-}
+  var m=14, s=22;
+  ctx.strokeStyle = 'rgba(42,143,204,0.55)';
+  ctx.lineWidth = 2;
+  [ [m,m], [cnv.width-m,m], [m,cnv.height-m], [cnv.width-m,cnv.height-m] ]
+    .forEach(function(pt, i) {
+      var x=pt[0], y=pt[1];
+      var dx=(i%2===0)?1:-1, dy=(i<2)?1:-1;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx*s,y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+dy*s); ctx.stroke();
+    });
 
-var currentMissingPins = [];
-
-function animateCam() {
-  animFrame++;
-  scanLineY += scanDir * 1.2;
-  var maxY = camCanvas.height;
-  if(scanLineY > maxY){ scanDir=-1; scanLineY=maxY; }
-  if(scanLineY < 0){ scanDir=1; scanLineY=0; }
-
-  var cx = camCanvas.width/2, cy = camCanvas.height/2;
-  var r  = Math.min(cx,cy)*0.82;
-  drawConnector(camCtx, cx, cy, r, animFrame, currentMissingPins);
-  requestAnimationFrame(animateCam);
-}
-
-// ── Gauge ──────────────────────────────────────────────────────────────────
-function drawGauge(pct) {
-  var c = document.getElementById('gaugeCanvas');
-  var ctx = c.getContext('2d');
-  var cx=55,cy=55,r=44,lw=8;
-  ctx.clearRect(0,0,110,110);
-
-  // Track
-  ctx.beginPath(); ctx.arc(cx,cy,r, 0.75*Math.PI, 2.25*Math.PI);
-  ctx.strokeStyle='#1a2535'; ctx.lineWidth=lw; ctx.lineCap='round'; ctx.stroke();
-
-  // Fill
-  if(pct>0){
-    var end = 0.75*Math.PI + (pct/100)*1.5*Math.PI;
-    var grad = ctx.createLinearGradient(cx-r,cy,cx+r,cy);
-    grad.addColorStop(0,'#00d4ff');
-    grad.addColorStop(1,'#00ff88');
-    ctx.beginPath(); ctx.arc(cx,cy,r,0.75*Math.PI,end);
-    ctx.strokeStyle=grad; ctx.lineWidth=lw; ctx.lineCap='round'; ctx.stroke();
+  // Flash overlay on inspect
+  if(detection.flash > 0) {
+    var col = detection.isPass ? 'rgba(34,197,94,' : 'rgba(239,68,68,';
+    ctx.fillStyle = col + (detection.flash * 0.18) + ')';
+    ctx.fillRect(0,0,cnv.width,cnv.height);
+    detection.flash = Math.max(0, detection.flash - 0.06);
   }
 
-  // Text
-  ctx.fillStyle='#e2e8f0';
-  ctx.font='bold 18px Space Mono,monospace';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(pct+'%',cx,cy-5);
-  ctx.font='9px Space Mono,monospace';
-  ctx.fillStyle='#64748b';
-  ctx.fillText('PASS RATE',cx,cy+12);
+  // Detection boxes
+  if(detection.active) {
+    detection.boxes.forEach(function(box) {
+      var x = box.x * cnv.width;
+      var y = box.y * cnv.height;
+      var w = box.w * cnv.width;
+      var h = box.h * cnv.height;
+      var col = box.type === 'ok' ? '#22C55E' : '#EF4444';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+
+      // Label bg
+      var label = box.label + ' ' + (box.conf*100).toFixed(0) + '%';
+      ctx.font = 'bold 11px "Segoe UI",sans-serif';
+      var tw = ctx.measureText(label).width;
+      ctx.fillStyle = col;
+      ctx.fillRect(x, y - 18, tw + 8, 18);
+      ctx.fillStyle = '#0D0D12';
+      ctx.fillText(label, x+4, y-4);
+    });
+  }
 }
 
 // ── Inspection logic ──────────────────────────────────────────────────────
 function pickRandom(arr, n) {
-  var copy = arr.slice();
-  var res = [];
-  for(var i=0;i<n&&copy.length;i++){
-    var idx = Math.floor(Math.random()*copy.length);
-    res.push(copy.splice(idx,1)[0]);
+  var cp = arr.slice(), res = [];
+  for(var i=0; i<n && cp.length; i++) {
+    res.push(cp.splice(Math.floor(Math.random()*cp.length), 1)[0]);
   }
   return res;
 }
@@ -617,144 +1028,113 @@ function runInspection() {
   if(inspecting) return;
   inspecting = true;
 
-  var btn = document.getElementById('captureBtn');
-  btn.disabled = true;
-  btn.textContent = '⟳ Inspecting...';
+  var t0 = Date.now();
+  detection.flash = 1.0;
 
-  // Trigger scan overlay
-  var overlay = document.getElementById('scanOverlay');
-  overlay.classList.add('active');
-  setTimeout(function(){ overlay.classList.remove('active'); }, 800);
+  setTimeout(function() {
+    var isPass  = Math.random() < 0.75;
+    var conf    = isPass
+      ? (0.85 + Math.random()*0.14)
+      : (0.62 + Math.random()*0.22);
+    var defects = isPass ? [] : pickRandom(DEFECTS, Math.floor(Math.random()*2)+1);
+    var elapsed = Date.now() - t0;
 
-  var startTs = Date.now();
-
-  setTimeout(function(){
-    var isPASS = Math.random() < 0.75;
-    var conf   = isPASS
-      ? (Math.floor(Math.random()*14)+85)
-      : (Math.floor(Math.random()*22)+62);
-    var defects = isPASS ? [] : pickRandom(DEFECTS, Math.floor(Math.random()*2)+1);
-    var elapsed = Date.now() - startTs;
-    var pinCount = isPASS ? 20 : 20 - defects.filter(function(d){return d.indexOf('pin')!==-1;}).length;
-
-    // Extract pin numbers for connector visual
-    currentMissingPins = [];
-    defects.forEach(function(d){
+    // Extract missing pin numbers
+    var missingPins = [];
+    defects.forEach(function(d) {
       var m = d.match(/pin #(\d+)/);
-      if(m) currentMissingPins.push(parseInt(m[1]));
+      if(m) missingPins.push(parseInt(m[1]));
     });
 
-    // Update result box
-    var box = document.getElementById('resultBox');
+    // Build overlay boxes
+    var boxes = [];
+    var cx = 0.5 + (Math.random()-0.5)*0.1;
+    var cy = 0.45 + (Math.random()-0.5)*0.1;
+    var bw = 0.30 + Math.random()*0.12;
+    var bh = bw * 0.7;
+    boxes.push({
+      x: cx-bw/2, y: cy-bh/2, w: bw, h: bh,
+      type: isPass ? 'ok' : 'fail',
+      label: 'HVS420',
+      conf: conf
+    });
+    if(!isPass && missingPins.length) {
+      boxes.push({
+        x: cx + bw*0.1, y: cy - bh*0.2,
+        w: bw*0.3, h: bh*0.3,
+        type: 'fail', label: 'DEFECT', conf: 0.78+Math.random()*0.15
+      });
+    }
+
+    detection.active = true;
+    detection.isPass = isPass;
+    detection.boxes  = boxes;
+    detection.flash  = 1.2;
+
+    var pinCount = isPass ? 20 : 20 - missingPins.length;
+
+    // ── Update Result panel ───────────────────────────────────────────────
     var verdict = document.getElementById('resultVerdict');
-    box.className = 'result-box ' + (isPASS ? 'pass' : 'fail');
-    if(!isPASS){ box.classList.add('shake'); setTimeout(function(){ box.classList.remove('shake'); },500); }
-    verdict.className = 'result-verdict ' + (isPASS ? 'pass' : 'fail');
-    verdict.textContent = isPASS ? 'PASS' : 'FAIL';
+    verdict.textContent = isPass ? 'PASS' : 'FAIL';
+    verdict.style.color = isPass ? 'var(--pass)' : 'var(--fail)';
 
-    // Confidence
-    var confBar = document.getElementById('confBar');
-    document.getElementById('confPct').textContent = conf + '%';
-    confBar.style.background = isPASS
-      ? 'linear-gradient(90deg,#00d4ff,#00ff88)'
-      : 'linear-gradient(90deg,#ff3b5c,#ff8c42)';
-    confBar.style.width = conf + '%';
+    var defLbl = document.getElementById('defectLbl');
+    defLbl.textContent = defects.map(function(d){ return '  ·  '+d; }).join('\n');
 
-    // Pins
-    var pd = document.getElementById('pinsDisplay');
-    pd.textContent = pinCount + ' / 20 PINS';
-    pd.className = 'pins-display ' + (isPASS ? 'ok' : 'bad');
+    var confPct = Math.round(conf*100);
+    document.getElementById('confLabel').textContent = 'Confidence  ' + confPct + '%';
+    document.getElementById('confPct').textContent = confPct + '%';
+    var fill = document.getElementById('confFill');
+    fill.style.width = confPct + '%';
+    fill.style.background = isPass ? 'var(--blue)' : 'var(--fail)';
 
-    // Time
-    document.getElementById('inspTime').textContent = 'Inspection time: ' + elapsed + ' ms';
+    document.getElementById('pinsLbl').textContent =
+      'Pins  ' + pinCount + ' / 20';
+    document.getElementById('pinsLbl').style.color = isPass ? 'var(--text1)' : 'var(--fail)';
+    document.getElementById('timeLbl').textContent = elapsed.toFixed(1) + '  ms';
 
-    // Defect list
-    var dl = document.getElementById('defectList');
-    dl.innerHTML = '';
-    defects.forEach(function(d){
-      var div = document.createElement('div');
-      div.className = 'defect-item';
-      div.textContent = '▸ ' + d;
-      dl.appendChild(div);
-    });
-
-    // Update stats
+    // ── Stats ─────────────────────────────────────────────────────────────
     stats.total++;
-    if(isPASS) stats.passed++; else stats.failed++;
-    stats.confSum += conf;
-    updateStats();
+    stats.confSum += confPct;
+    stats.timeSum += elapsed;
+    if(isPass) stats.passed++; else stats.failed++;
+    var pr = stats.total ? (stats.passed/stats.total*100) : 0;
 
-    // Add history row
-    addHistoryRow(isPASS, defects, conf);
+    drawGauge(pr);
+    document.getElementById('mcTotal').textContent = stats.total;
+    document.getElementById('mcPass').textContent  = stats.passed;
+    document.getElementById('mcFail').textContent  = stats.failed;
+    document.getElementById('mcConf').textContent  =
+      (stats.confSum/stats.total).toFixed(1) + '%';
+    document.getElementById('mcTime').textContent  =
+      (stats.timeSum/stats.total).toFixed(1) + ' ms';
+
+    // ── History ───────────────────────────────────────────────────────────
+    var now = new Date();
+    var t = [now.getHours(),now.getMinutes(),now.getSeconds()]
+      .map(function(n){return('0'+n).slice(-2);}).join(':');
+    var defStr = defects.length
+      ? defects.join('  ·  ')
+      : '—';
+
+    var row = document.createElement('tr');
+    row.className = isPass ? 'row-pass' : 'row-fail';
+    row.innerHTML =
+      '<td>'+t+'</td>'+
+      '<td class="'+(isPass?'td-result-pass':'td-result-fail')+'">'+(isPass?'PASS':'FAIL')+'</td>'+
+      '<td title="'+defStr+'">'+defStr+'</td>'+
+      '<td>'+confPct+'%</td>'+
+      '<td>MOCK</td>';
+
+    var body = document.getElementById('histBody');
+    body.insertBefore(row, body.firstChild);
+    while(body.rows.length > 100) body.deleteRow(body.rows.length-1);
 
     inspecting = false;
-    btn.disabled = false;
-    btn.textContent = '⬡ Capture & Inspect';
-  }, 850);
+  }, 650);
 }
 
-function updateStats() {
-  document.getElementById('statTotal').textContent  = stats.total;
-  document.getElementById('statPassed').textContent = stats.passed;
-  document.getElementById('statFailed').textContent = stats.failed;
-  var avgConf = stats.total ? Math.round(stats.confSum/stats.total) : 0;
-  document.getElementById('statConf').textContent = stats.total ? avgConf+'%' : '—';
-  var rate = stats.total ? Math.round((stats.passed/stats.total)*100) : 0;
-  drawGauge(rate);
-}
-
-function addHistoryRow(isPASS, defects, conf) {
-  var now = new Date();
-  var t = [now.getHours(),now.getMinutes(),now.getSeconds()]
-    .map(function(n){return('0'+n).slice(-2);}).join(':');
-
-  history.unshift({ n:stats.total, t:t, pass:isPASS, defects:defects, conf:conf });
-  if(history.length>20) history.pop();
-
-  renderHistory();
-}
-
-function renderHistory() {
-  var body = document.getElementById('historyBody');
-  body.innerHTML = '';
-  history.forEach(function(row){
-    var div = document.createElement('div');
-    div.className = 'history-row';
-    var defStr = row.defects.length ? row.defects[0]+(row.defects.length>1?' (+1)':'') : '—';
-    div.innerHTML =
-      '<span>#'+row.n+'</span>'+
-      '<span>'+row.t+'</span>'+
-      '<span><span class="pill '+(row.pass?'pass':'fail')+'">'+(row.pass?'PASS':'FAIL')+'</span></span>'+
-      '<span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+defStr+'</span>'+
-      '<span>'+row.conf+'%</span>';
-    body.appendChild(div);
-  });
-}
-
-// ── Controls ───────────────────────────────────────────────────────────────
-document.getElementById('captureBtn').addEventListener('click', function(){
-  clearTimeout(autoTimer);
-  runInspection();
-  scheduleAuto();
-});
-
-document.getElementById('resetBtn').addEventListener('click', function(){
-  stats = { total:0, passed:0, failed:0, confSum:0 };
-  history = [];
-  currentMissingPins = [];
-  document.getElementById('historyBody').innerHTML = '';
-  document.getElementById('resultBox').className = 'result-box';
-  document.getElementById('resultVerdict').className = 'result-verdict idle';
-  document.getElementById('resultVerdict').textContent = 'READY';
-  document.getElementById('confPct').textContent = '—';
-  document.getElementById('confBar').style.width = '0%';
-  document.getElementById('pinsDisplay').textContent = '— / 20 PINS';
-  document.getElementById('inspTime').textContent = 'Awaiting inspection';
-  document.getElementById('defectList').innerHTML = '';
-  updateStats();
-});
-
-// ── Auto-run every 4s ──────────────────────────────────────────────────────
+// ── Auto inspection ────────────────────────────────────────────────────────
 function scheduleAuto() {
   clearTimeout(autoTimer);
   autoTimer = setTimeout(function(){
@@ -763,19 +1143,81 @@ function scheduleAuto() {
   }, 4000);
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────
-window.addEventListener('load', function(){
-  resizeCam();
-  drawGauge(0);
-  animateCam();
-  setTimeout(function(){
-    runInspection();
-    scheduleAuto();
-  }, 1200);
+// ── Load Image (static inspection) ────────────────────────────────────────
+function loadImage() {
+  document.getElementById('fileInput').click();
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  if(!e.target.files.length) return;
+  var url = URL.createObjectURL(e.target.files[0]);
+  var vid = document.getElementById('camVideo');
+  // Show in video element as poster (just display statically)
+  var img = new Image();
+  img.onload = function() {
+    // Draw image on overlay canvas
+    var cnv = document.getElementById('camCanvas');
+    var wrap = document.getElementById('camWrap');
+    cnv.width = wrap.clientWidth; cnv.height = wrap.clientHeight;
+    var ctx = cnv.getContext('2d');
+    ctx.clearRect(0,0,cnv.width,cnv.height);
+    ctx.drawImage(img, 0, 0, cnv.width, cnv.height);
+    setSourcePill('STATIC', 'var(--text2)', 'rgba(72,72,100,0.3)', 'var(--border)');
+    clearTimeout(autoTimer);
+    setTimeout(runInspection, 400);
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+  document.getElementById('noCamMsg').style.display = 'none';
 });
 
-window.addEventListener('resize', function(){
-  resizeCam();
+// ── Reset ──────────────────────────────────────────────────────────────────
+function resetStats() {
+  stats = {total:0, passed:0, failed:0, confSum:0, timeSum:0};
+  document.getElementById('histBody').innerHTML = '';
+  document.getElementById('resultVerdict').textContent = 'WAITING';
+  document.getElementById('resultVerdict').style.color = 'var(--text3)';
+  document.getElementById('defectLbl').textContent = '';
+  document.getElementById('confLabel').textContent = 'Confidence';
+  document.getElementById('confPct').textContent = '—';
+  document.getElementById('confFill').style.width = '0%';
+  document.getElementById('pinsLbl').textContent = 'Pins — / —';
+  document.getElementById('timeLbl').textContent = '— ms';
+  ['mcTotal','mcPass','mcFail'].forEach(function(id){ document.getElementById(id).textContent='0'; });
+  document.getElementById('mcConf').textContent = '—';
+  document.getElementById('mcTime').textContent = '—';
+  detection.active = false;
+  detection.boxes = [];
+  drawGauge(0);
+}
+
+// ── Export CSV ─────────────────────────────────────────────────────────────
+function exportCSV() {
+  var rows = [['Time','Result','Defects','Confidence','Engine']];
+  var trs = document.getElementById('histBody').rows;
+  for(var i=0; i<trs.length; i++) {
+    var cells = trs[i].cells;
+    rows.push([cells[0].textContent, cells[1].textContent,
+               '"'+cells[2].textContent+'"', cells[3].textContent, cells[4].textContent]);
+  }
+  var csv = rows.map(function(r){ return r.join(','); }).join('\r\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'hvs_history_' + new Date().toISOString().slice(0,16).replace(/[:T]/g,'-') + '.csv';
+  a.click();
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  drawGauge(0);
+  // Start mock auto-loop even without camera
+  setTimeout(function() {
+    scheduleAuto();
+  }, 1500);
+});
+
+window.addEventListener('resize', function() {
+  drawGauge(stats.total ? stats.passed/stats.total*100 : 0);
 });
 </script>
 </body>
