@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="520" height="520">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur4">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="520" height="520" fill="url(#bg)"/>
+  <!-- Subtle grid lines -->
+  <g stroke="#00d4ff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="52" x2="520" y2="52"/>
+    <line x1="0" y1="104" x2="520" y2="104"/>
+    <line x1="0" y1="156" x2="520" y2="156"/>
+    <line x1="0" y1="208" x2="520" y2="208"/>
+    <line x1="0" y1="260" x2="520" y2="260"/>
+    <line x1="0" y1="312" x2="520" y2="312"/>
+    <line x1="0" y1="364" x2="520" y2="364"/>
+    <line x1="0" y1="416" x2="520" y2="416"/>
+    <line x1="0" y1="468" x2="520" y2="468"/>
+    <line x1="52" y1="0" x2="52" y2="520"/>
+    <line x1="104" y1="0" x2="104" y2="520"/>
+    <line x1="156" y1="0" x2="156" y2="520"/>
+    <line x1="208" y1="0" x2="208" y2="520"/>
+    <line x1="260" y1="0" x2="260" y2="520"/>
+    <line x1="312" y1="0" x2="312" y2="520"/>
+    <line x1="364" y1="0" x2="364" y2="520"/>
+    <line x1="416" y1="0" x2="416" y2="520"/>
+    <line x1="468" y1="0" x2="468" y2="520"/>
+  </g>
+
+  <!-- Glow behind connector -->
+  <circle cx="260" cy="248" r="155" fill="url(#glow)"/>
+
+  <!-- Outer housing ring (dark metal) -->
+  <circle cx="260" cy="248" r="148" fill="none" stroke="#2a3545" stroke-width="16"/>
+  <circle cx="260" cy="248" r="140" fill="#161e2e" stroke="#1e2d42" stroke-width="2"/>
+
+  <!-- Locking ring notches -->
+  <circle cx="260" cy="108" r="9" fill="#2a3a52" stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.6"/>
+  <circle cx="260" cy="388" r="9" fill="#2a3a52" stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.6"/>
+  <circle cx="120" cy="248" r="9" fill="#2a3a52" stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.6"/>
+  <circle cx="400" cy="248" r="9" fill="#2a3a52" stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.6"/>
+
+  <!-- Inner amber ring -->
+  <circle cx="260" cy="248" r="112" fill="none" stroke="#c8750a" stroke-width="10" stroke-opacity="0.85"/>
+  <circle cx="260" cy="248" r="107" fill="#0f1820"/>
+
+  <!-- Center body -->
+  <circle cx="260" cy="248" r="52" fill="#1a2535" stroke="#2a3a52" stroke-width="2"/>
+  <!-- Brand mark in center -->
+  <text x="260" y="244" text-anchor="middle" font-family="monospace" font-size="11" fill="#00d4ff" fill-opacity="0.7" letter-spacing="2">HVS</text>
+  <text x="260" y="260" text-anchor="middle" font-family="monospace" font-size="9" fill="#00d4ff" fill-opacity="0.4" letter-spacing="1">420/240</text>
+
+  <!-- 20 gold pins arranged in circle (r=82 from center) -->
+  <!-- Pin positions calculated at angles 0°, 18°, 36°, ... 342° -->
+  <g fill="#d4a017" stroke="#f0c040" stroke-width="1">
+    <!-- pin 1 -->  <circle cx="342" cy="248" r="7.5"/>
+    <!-- pin 2 -->  <circle cx="335.9" cy="272.3" r="7.5"/>
+    <!-- pin 3 -->  <circle cx="317.2" cy="291.2" r="7.5"/>
+    <!-- pin 4 -->  <circle cx="291.9" cy="301.5" r="7.5"/>
+    <!-- pin 5 -->  <circle cx="264.5" cy="301.6" r="7.5"/>
+    <!-- pin 6 -->  <circle cx="239.8" cy="291.7" r="7.5"/>
+    <!-- pin 7 -->  <circle cx="220.7" cy="273.2" r="7.5"/>
+    <!-- pin 8 -->  <circle cx="212.3" cy="249.1" r="7.5"/>
+    <!-- pin 9 -->  <circle cx="216.5" cy="224.5" r="7.5"/>
+    <!-- pin 10 --> <circle cx="232.7" cy="204.2" r="7.5"/>
+    <!-- pin 11 --> <circle cx="256.1" cy="193.3" r="7.5"/>
+    <!-- pin 12 --> <circle cx="281.5" cy="192.7" r="7.5"/>
+    <!-- pin 13 --> <circle cx="304.7" cy="202.3" r="7.5"/>
+    <!-- pin 14 --> <circle cx="321.8" cy="221.3" r="7.5"/>
+    <!-- pin 15 --> <circle cx="330.2" cy="245.8" r="7.5"/>
+    <!-- pin 16 --> <circle cx="327.1" cy="270.9" r="7.5"/>
+    <!-- pin 17 --> <circle cx="311.5" cy="291.2" r="7.5"/>
+    <!-- pin 18 --> <circle cx="287.8" cy="301.5" r="7.5"/>
+    <!-- pin 19 --> <circle cx="232.7" cy="295.3" r="7.5"/>
+    <!-- pin 20 --> <circle cx="242.1" cy="201.2" r="7.5"/>
+  </g>
+
+  <!-- Pin highlight dots -->
+  <g fill="#ffe580" fill-opacity="0.5">
+    <circle cx="342" cy="245" r="3"/>
+    <circle cx="335.9" cy="269.3" r="3"/>
+    <circle cx="317.2" cy="288.2" r="3"/>
+    <circle cx="212.3" cy="246.1" r="3"/>
+    <circle cx="256.1" cy="190.3" r="3"/>
+  </g>
+
+  <!-- Scan line animation hint (static) -->
+  <line x1="120" y1="248" x2="400" y2="248" stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.15" stroke-dasharray="4 6"/>
+
+  <!-- Corner brackets (targeting reticle) -->
+  <g stroke="#00d4ff" stroke-width="2" fill="none" stroke-opacity="0.7">
+    <path d="M56 44 L56 74 M56 44 L86 44"/>
+    <path d="M464 44 L464 74 M464 44 L434 44"/>
+    <path d="M56 476 L56 446 M56 476 L86 476"/>
+    <path d="M464 476 L464 446 M464 476 L434 476"/>
+  </g>
+
+  <!-- Top header bar -->
+  <rect x="0" y="0" width="520" height="36" fill="#0d1117" fill-opacity="0.92"/>
+  <line x1="0" y1="36" x2="520" y2="36" stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="16" y="23" font-family="monospace" font-size="11" fill="#00d4ff" letter-spacing="2">HVS 420/240 · QUALITY CONTROL</text>
+  <rect x="396" y="8" width="80" height="18" rx="9" fill="#00d4ff" fill-opacity="0.12" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="436" y="21" text-anchor="middle" font-family="monospace" font-size="9" fill="#00d4ff" letter-spacing="1">MOCK MODE</text>
+
+  <!-- Bottom bar: PASS status -->
+  <rect x="0" y="484" width="520" height="36" fill="#0d1117" fill-opacity="0.92"/>
+  <rect x="16" y="494" width="70" height="16" rx="3" fill="#00ff88" fill-opacity="0.15" stroke="#00ff88" stroke-width="1" stroke-opacity="0.6"/>
+  <text x="51" y="506" text-anchor="middle" font-family="monospace" font-size="9" fill="#00ff88" letter-spacing="2">PASS</text>
+  <text x="240" y="506" text-anchor="middle" font-family="monospace" font-size="9" fill="#4a5568" letter-spacing="1">20 / 20 PINS · 97.4% CONF</text>
+  <rect x="414" y="494" width="90" height="16" rx="3" fill="#00d4ff" fill-opacity="0.08" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="459" y="506" text-anchor="middle" font-family="monospace" font-size="9" fill="#00d4ff" fill-opacity="0.7" letter-spacing="1">YOLOv8 · 28ms</text>
+</svg>

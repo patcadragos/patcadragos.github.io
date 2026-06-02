@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HVS 420/240 — AI Vision QC Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0d1117;
+  --bg2:       #111827;
+  --bg3:       #1a2535;
+  --border:    rgba(0,212,255,0.15);
+  --cyan:      #00d4ff;
+  --cyan-dim:  rgba(0,212,255,0.12);
+  --green:     #00ff88;
+  --red:       #ff3b5c;
+  --amber:     #f59e0b;
+  --gold:      #d4a017;
+  --text:      #e2e8f0;
+  --text-sec:  #64748b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  height:60px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 2rem;
+  background: rgba(10,10,10,0.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,107,0,0.2);
+}
+.nav-brand {
+  font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:0.1em;
+  background:linear-gradient(135deg,#FF6B00,#ff7d1a);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.nav-back {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:600;
+  letter-spacing:0.07em; text-transform:uppercase;
+  color:#FF6B00; border:1.5px solid #FF6B00;
+  padding:0.38rem 1rem; text-decoration:none;
+  position:relative; overflow:hidden; transition:color 0.25s;
+}
+.nav-back::before {
+  content:''; position:absolute; top:0; left:-100%;
+  width:100%; height:100%; background:#FF6B00;
+  z-index:-1; transition:left 0.25s;
+}
+.nav-back:hover { color:#0a0a0a; }
+.nav-back:hover::before { left:0; }
+
+/* ── DEMO WRAPPER ── */
+.demo-page { padding-top:60px; }
+
+/* ── HVS HEADER BAR ── */
+.hvs-header {
+  background:#0d1117;
+  border-bottom:2px solid var(--cyan);
+  padding:0 1.5rem;
+  height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.hvs-title {
+  font-family:'Space Mono',monospace;
+  font-size:0.82rem; letter-spacing:0.14em;
+  color:var(--cyan);
+}
+.hvs-header-right {
+  display:flex; align-items:center; gap:0.8rem;
+}
+.mock-badge {
+  padding:2px 10px; border-radius:20px;
+  background:var(--cyan-dim); border:1px solid rgba(0,212,255,0.4);
+  font-family:'Space Mono',monospace; font-size:0.65rem;
+  letter-spacing:0.1em; color:var(--cyan);
+}
+#liveClock {
+  font-family:'Space Mono',monospace; font-size:0.72rem;
+  color:var(--text-sec);
+}
+
+/* ── MAIN GRID ── */
+.hvs-body {
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:2px;
+  background:#000;
+  height:calc(100vh - 60px - 44px - 160px);
+  min-height:380px;
+}
+.hvs-panel {
+  background:var(--bg);
+  padding:1rem;
+  display:flex; flex-direction:column; gap:0.75rem;
+  overflow:hidden;
+}
+.panel-title {
+  font-family:'Space Mono',monospace;
+  font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--cyan); padding-bottom:0.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.fps-badge {
+  font-family:'Space Mono',monospace; font-size:0.62rem;
+  color:var(--green); letter-spacing:0.08em;
+}
+
+/* ── CAMERA FEED ── */
+#cameraCanvas {
+  width:100%; flex:1;
+  border:1px solid var(--border);
+  background:#080d14;
+  display:block;
+  min-height:200px;
+}
+.capture-btn {
+  width:100%; padding:0.7rem;
+  background:linear-gradient(135deg,var(--cyan),#0099bb);
+  color:#000; font-family:'Space Mono',monospace;
+  font-size:0.75rem; font-weight:700; letter-spacing:0.1em;
+  border:none; cursor:pointer;
+  text-transform:uppercase;
+  transition:opacity 0.15s, transform 0.1s;
+}
+.capture-btn:hover { opacity:0.88; }
+.capture-btn:active { transform:scale(0.97); }
+.capture-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* ── RESULT PANEL ── */
+.result-box {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:0.6rem;
+  border:1px solid var(--border);
+  background:#080d14; padding:1rem;
+  transition:border-color 0.3s, box-shadow 0.3s;
+  position:relative;
+}
+.result-box.pass {
+  border-color:var(--green);
+  box-shadow:0 0 24px rgba(0,255,136,0.18), inset 0 0 24px rgba(0,255,136,0.04);
+}
+.result-box.fail {
+  border-color:var(--red);
+  box-shadow:0 0 24px rgba(255,59,92,0.22), inset 0 0 24px rgba(255,59,92,0.06);
+}
+.result-box.shake {
+  animation:shake 0.4s ease;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+.result-verdict {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2.8rem; letter-spacing:0.12em;
+  transition:color 0.3s;
+}
+.result-verdict.pass { color:var(--green); }
+.result-verdict.fail { color:var(--red); }
+.result-verdict.idle { color:var(--text-sec); }
+.result-conf {
+  width:100%;
+  display:flex; flex-direction:column; gap:0.25rem;
+}
+.conf-label {
+  font-family:'Space Mono',monospace; font-size:0.62rem;
+  color:var(--text-sec); display:flex; justify-content:space-between;
+}
+.conf-bar-bg {
+  width:100%; height:6px; background:#1a2535; border-radius:3px; overflow:hidden;
+}
+.conf-bar-fill {
+  height:100%; background:var(--cyan); border-radius:3px;
+  transition:width 0.6s cubic-bezier(0.23,1,0.32,1);
+}
+.pins-display {
+  font-family:'Space Mono',monospace;
+  font-size:1rem; letter-spacing:0.08em;
+}
+.pins-display.ok { color:var(--green); }
+.pins-display.bad { color:var(--red); }
+.insp-time {
+  font-family:'Space Mono',monospace;
+  font-size:0.65rem; color:var(--text-sec);
+}
+.defect-list {
+  width:100%; display:flex; flex-direction:column; gap:0.25rem;
+  max-height:80px; overflow-y:auto;
+}
+.defect-item {
+  font-family:'Space Mono',monospace; font-size:0.62rem;
+  color:var(--red); padding:2px 6px;
+  background:rgba(255,59,92,0.08); border-left:2px solid var(--red);
+}
+
+/* ── STATS PANEL ── */
+.stat-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.4rem 0;
+  border-bottom:1px solid rgba(0,212,255,0.06);
+  font-size:0.85rem;
+}
+.stat-label { color:var(--text-sec); font-size:0.8rem; }
+.stat-val {
+  font-family:'Space Mono',monospace; font-size:0.85rem;
+  color:var(--cyan);
+}
+.stat-val.green { color:var(--green); }
+.stat-val.red   { color:var(--red); }
+.gauge-wrap {
+  display:flex; align-items:center; justify-content:center;
+  padding:0.5rem 0;
+}
+#gaugeCanvas { display:block; }
+.reset-btn {
+  width:100%; padding:0.5rem;
+  background:transparent; color:var(--text-sec);
+  border:1px solid rgba(100,116,139,0.3);
+  font-family:'Space Mono',monospace; font-size:0.65rem;
+  letter-spacing:0.1em; cursor:pointer; text-transform:uppercase;
+  transition:border-color 0.2s, color 0.2s;
+}
+.reset-btn:hover { border-color:var(--cyan); color:var(--cyan); }
+
+/* ── HISTORY TABLE ── */
+.history-panel {
+  background:var(--bg2);
+  border-top:2px solid var(--border);
+  height:160px;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.history-header {
+  display:grid;
+  grid-template-columns:44px 1fr 80px 1fr 80px;
+  gap:0;
+  background:#0d1117;
+  border-bottom:1px solid var(--border);
+  padding:0 1rem;
+}
+.history-header span {
+  font-family:'Space Mono',monospace;
+  font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--text-sec); padding:0.5rem 0;
+}
+.history-body {
+  flex:1; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:rgba(0,212,255,0.2) transparent;
+}
+.history-body::-webkit-scrollbar { width:4px; }
+.history-body::-webkit-scrollbar-thumb { background:rgba(0,212,255,0.2); }
+.history-row {
+  display:grid;
+  grid-template-columns:44px 1fr 80px 1fr 80px;
+  gap:0;
+  padding:0 1rem;
+  border-bottom:1px solid rgba(0,212,255,0.04);
+  animation:rowIn 0.25s ease;
+}
+@keyframes rowIn {
+  from{opacity:0;transform:translateY(-8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.history-row span {
+  font-family:'Space Mono',monospace;
+  font-size:0.62rem; color:var(--text-sec);
+  padding:0.42rem 0; display:flex; align-items:center;
+}
+.pill {
+  display:inline-block; padding:1px 7px; border-radius:10px;
+  font-size:0.58rem; font-family:'Space Mono',monospace;
+  letter-spacing:0.08em;
+}
+.pill.pass { background:rgba(0,255,136,0.12); color:var(--green); border:1px solid rgba(0,255,136,0.3); }
+.pill.fail { background:rgba(255,59,92,0.12); color:var(--red);   border:1px solid rgba(255,59,92,0.3); }
+
+/* ── SCANNING OVERLAY ── */
+.scanning-overlay {
+  display:none; position:absolute; inset:0;
+  background:rgba(0,212,255,0.06);
+  pointer-events:none;
+}
+.scanning-overlay.active { display:block; animation:scanPulse 0.8s ease; }
+@keyframes scanPulse {
+  0%{background:rgba(0,212,255,0.0)}
+  40%{background:rgba(0,212,255,0.12)}
+  100%{background:rgba(0,212,255,0.0)}
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hvs-body{
+    grid-template-columns:1fr 1fr;
+    height:auto;
+  }
+  .panel-stats{grid-column:span 2;}
+  .history-header,.history-row{
+    grid-template-columns:36px 1fr 66px 1fr 60px;
+  }
+}
+@media(max-width:600px){
+  .hvs-body{grid-template-columns:1fr; height:auto;}
+  .panel-stats{grid-column:span 1;}
+}
+</style>
+</head>
+<body>
+
+<!-- PORTFOLIO NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">DRAGOS</a>
+  <a href="index.html#projects" class="nav-back">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Projects
+  </a>
+</nav>
+
+<div class="demo-page">
+
+  <!-- HVS APP HEADER -->
+  <div class="hvs-header">
+    <div class="hvs-title">HVS 420/240 &nbsp;·&nbsp; QUALITY CONTROL SYSTEM</div>
+    <div class="hvs-header-right">
+      <span class="mock-badge">MOCK MODE</span>
+      <span id="liveClock">00:00:00</span>
+    </div>
+  </div>
+
+  <!-- 3-COLUMN MAIN GRID -->
+  <div class="hvs-body">
+
+    <!-- PANEL 1: CAMERA FEED -->
+    <div class="hvs-panel panel-camera">
+      <div class="panel-title">
+        Camera Feed
+        <span class="fps-badge" id="fpsBadge">▶ 30 FPS</span>
+      </div>
+      <canvas id="cameraCanvas"></canvas>
+      <button class="capture-btn" id="captureBtn">⬡ Capture &amp; Inspect</button>
+    </div>
+
+    <!-- PANEL 2: INSPECTION RESULT -->
+    <div class="hvs-panel panel-result">
+      <div class="panel-title">Inspection Result</div>
+      <div class="result-box" id="resultBox">
+        <div class="scanning-overlay" id="scanOverlay"></div>
+        <div class="result-verdict idle" id="resultVerdict">READY</div>
+        <div class="conf-label" style="width:100%">
+          <span>Confidence</span>
+          <span id="confPct">—</span>
+        </div>
+        <div class="result-conf">
+          <div class="conf-bar-bg">
+            <div class="conf-bar-fill" id="confBar" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="pins-display ok" id="pinsDisplay">— / 20 PINS</div>
+        <div class="insp-time" id="inspTime">Awaiting inspection</div>
+        <div class="defect-list" id="defectList"></div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: STATISTICS -->
+    <div class="hvs-panel panel-stats">
+      <div class="panel-title">Statistics</div>
+      <div class="gauge-wrap">
+        <canvas id="gaugeCanvas" width="110" height="110"></canvas>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Total Inspections</span>
+        <span class="stat-val" id="statTotal">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Passed</span>
+        <span class="stat-val green" id="statPassed">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Failed</span>
+        <span class="stat-val red" id="statFailed">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Avg. Confidence</span>
+        <span class="stat-val" id="statConf">—</span>
+      </div>
+      <button class="reset-btn" id="resetBtn">↺ Reset Statistics</button>
+    </div>
+
+  </div><!-- /hvs-body -->
+
+  <!-- HISTORY TABLE -->
+  <div class="history-panel">
+    <div class="history-header">
+      <span>#</span>
+      <span>Time</span>
+      <span>Result</span>
+      <span>Defects</span>
+      <span>Conf</span>
+    </div>
+    <div class="history-body" id="historyBody"></div>
+  </div>
+
+</div><!-- /demo-page -->
+
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────────────────
+var stats = { total:0, passed:0, failed:0, confSum:0 };
+var history = [];
+var inspecting = false;
+var autoTimer = null;
+
+var DEFECTS = [
+  'Missing pin #7','Missing pin #12','Missing pin #3','Missing pin #17',
+  'Scratch on housing','Missing locking ring',
+  'Orientation: 180°','Deformation on entry port',
+  'Missing sealing ring','Missing pin #19'
+];
+
+// ── Clock ──────────────────────────────────────────────────────────────────
+function updateClock() {
+  var now = new Date();
+  document.getElementById('liveClock').textContent =
+    [now.getHours(),now.getMinutes(),now.getSeconds()]
+      .map(function(n){return ('0'+n).slice(-2);}).join(':');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Camera canvas ─────────────────────────────────────────────────────────
+var camCanvas = document.getElementById('cameraCanvas');
+var camCtx    = camCanvas.getContext('2d');
+var scanLineY = 0;
+var scanDir   = 1;
+var animFrame = 0;
+
+function resizeCam() {
+  var rect = camCanvas.parentElement.getBoundingClientRect();
+  camCanvas.width  = Math.floor(rect.width - 32);
+  camCanvas.height = Math.floor(camCanvas.width * 0.78);
+}
+
+function drawConnector(ctx, cx, cy, r, frame, missingPins) {
+  missingPins = missingPins || [];
+
+  // Background
+  ctx.fillStyle = '#080d14';
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(0,212,255,0.05)';
+  ctx.lineWidth = 1;
+  var step = 24;
+  for(var x=0;x<ctx.canvas.width;x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,ctx.canvas.height); ctx.stroke(); }
+  for(var y=0;y<ctx.canvas.height;y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(ctx.canvas.width,y); ctx.stroke(); }
+
+  // Outer housing
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(42,53,69,1)'; ctx.lineWidth=r*0.10;
+  ctx.stroke();
+
+  // Locking ring notches (4 positions)
+  [[0],[90],[180],[270]].forEach(function(arr){
+    var a = arr[0]*Math.PI/180;
+    var nx=cx+Math.cos(a)*(r*1.08), ny=cy+Math.sin(a)*(r*1.08);
+    ctx.beginPath(); ctx.arc(nx,ny,r*0.06,0,Math.PI*2);
+    ctx.fillStyle='#1e2d42'; ctx.fill();
+    ctx.strokeStyle='rgba(0,212,255,0.5)'; ctx.lineWidth=1.2; ctx.stroke();
+  });
+
+  // Inner amber ring
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.78,0,Math.PI*2);
+  ctx.strokeStyle='rgba(200,117,10,0.9)'; ctx.lineWidth=r*0.07; ctx.stroke();
+
+  // Inner fill
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.74,0,Math.PI*2);
+  ctx.fillStyle='#0f1820'; ctx.fill();
+
+  // Center body
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.38,0,Math.PI*2);
+  ctx.fillStyle='#1a2535'; ctx.fill();
+  ctx.strokeStyle='#2a3a52'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Center label
+  ctx.fillStyle='rgba(0,212,255,0.6)';
+  ctx.font='bold '+(r*0.115)+'px Space Mono,monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('HVS', cx, cy-r*0.06);
+  ctx.font=(r*0.09)+'px Space Mono,monospace';
+  ctx.fillStyle='rgba(0,212,255,0.35)';
+  ctx.fillText('420/240', cx, cy+r*0.1);
+
+  // 20 pins
+  var pinR = r * 0.58;
+  var pinSize = r * 0.055;
+  for(var i=0;i<20;i++){
+    var angle = (i/20)*Math.PI*2 - Math.PI/2;
+    var px = cx + Math.cos(angle)*pinR;
+    var py = cy + Math.sin(angle)*pinR;
+    var missing = missingPins.indexOf(i+1) !== -1;
+    if(missing){
+      ctx.beginPath(); ctx.arc(px,py,pinSize,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,59,92,0.15)'; ctx.fill();
+      ctx.strokeStyle='rgba(255,59,92,0.6)'; ctx.lineWidth=1.2; ctx.stroke();
+      // X mark
+      ctx.strokeStyle='rgba(255,59,92,0.8)'; ctx.lineWidth=1;
+      var s=pinSize*0.55;
+      ctx.beginPath(); ctx.moveTo(px-s,py-s); ctx.lineTo(px+s,py+s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px+s,py-s); ctx.lineTo(px-s,py+s); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(px,py,pinSize,0,Math.PI*2);
+      ctx.fillStyle='#c8920a'; ctx.fill();
+      ctx.strokeStyle='#f0c040'; ctx.lineWidth=1.2; ctx.stroke();
+      // highlight
+      ctx.beginPath(); ctx.arc(px-pinSize*0.3,py-pinSize*0.3,pinSize*0.3,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,228,96,0.45)'; ctx.fill();
+    }
+  }
+
+  // Scan line
+  ctx.strokeStyle='rgba(0,212,255,0.35)';
+  ctx.lineWidth=1.5;
+  ctx.setLineDash([4,8]);
+  ctx.beginPath(); ctx.moveTo(cx-r,scanLineY); ctx.lineTo(cx+r,scanLineY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Corner reticles
+  var m=10, s2=18;
+  ctx.strokeStyle='rgba(0,212,255,0.5)'; ctx.lineWidth=1.5;
+  [[m,m],[ctx.canvas.width-m,m],[m,ctx.canvas.height-m],[ctx.canvas.width-m,ctx.canvas.height-m]]
+  .forEach(function(pt,idx){
+    var x=pt[0],y=pt[1];
+    var dx=(idx%2===0)?1:-1, dy=(idx<2)?1:-1;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx*s2,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+dy*s2); ctx.stroke();
+  });
+}
+
+var currentMissingPins = [];
+
+function animateCam() {
+  animFrame++;
+  scanLineY += scanDir * 1.2;
+  var maxY = camCanvas.height;
+  if(scanLineY > maxY){ scanDir=-1; scanLineY=maxY; }
+  if(scanLineY < 0){ scanDir=1; scanLineY=0; }
+
+  var cx = camCanvas.width/2, cy = camCanvas.height/2;
+  var r  = Math.min(cx,cy)*0.82;
+  drawConnector(camCtx, cx, cy, r, animFrame, currentMissingPins);
+  requestAnimationFrame(animateCam);
+}
+
+// ── Gauge ──────────────────────────────────────────────────────────────────
+function drawGauge(pct) {
+  var c = document.getElementById('gaugeCanvas');
+  var ctx = c.getContext('2d');
+  var cx=55,cy=55,r=44,lw=8;
+  ctx.clearRect(0,0,110,110);
+
+  // Track
+  ctx.beginPath(); ctx.arc(cx,cy,r, 0.75*Math.PI, 2.25*Math.PI);
+  ctx.strokeStyle='#1a2535'; ctx.lineWidth=lw; ctx.lineCap='round'; ctx.stroke();
+
+  // Fill
+  if(pct>0){
+    var end = 0.75*Math.PI + (pct/100)*1.5*Math.PI;
+    var grad = ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+    grad.addColorStop(0,'#00d4ff');
+    grad.addColorStop(1,'#00ff88');
+    ctx.beginPath(); ctx.arc(cx,cy,r,0.75*Math.PI,end);
+    ctx.strokeStyle=grad; ctx.lineWidth=lw; ctx.lineCap='round'; ctx.stroke();
+  }
+
+  // Text
+  ctx.fillStyle='#e2e8f0';
+  ctx.font='bold 18px Space Mono,monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(pct+'%',cx,cy-5);
+  ctx.font='9px Space Mono,monospace';
+  ctx.fillStyle='#64748b';
+  ctx.fillText('PASS RATE',cx,cy+12);
+}
+
+// ── Inspection logic ──────────────────────────────────────────────────────
+function pickRandom(arr, n) {
+  var copy = arr.slice();
+  var res = [];
+  for(var i=0;i<n&&copy.length;i++){
+    var idx = Math.floor(Math.random()*copy.length);
+    res.push(copy.splice(idx,1)[0]);
+  }
+  return res;
+}
+
+function runInspection() {
+  if(inspecting) return;
+  inspecting = true;
+
+  var btn = document.getElementById('captureBtn');
+  btn.disabled = true;
+  btn.textContent = '⟳ Inspecting...';
+
+  // Trigger scan overlay
+  var overlay = document.getElementById('scanOverlay');
+  overlay.classList.add('active');
+  setTimeout(function(){ overlay.classList.remove('active'); }, 800);
+
+  var startTs = Date.now();
+
+  setTimeout(function(){
+    var isPASS = Math.random() < 0.75;
+    var conf   = isPASS
+      ? (Math.floor(Math.random()*14)+85)
+      : (Math.floor(Math.random()*22)+62);
+    var defects = isPASS ? [] : pickRandom(DEFECTS, Math.floor(Math.random()*2)+1);
+    var elapsed = Date.now() - startTs;
+    var pinCount = isPASS ? 20 : 20 - defects.filter(function(d){return d.indexOf('pin')!==-1;}).length;
+
+    // Extract pin numbers for connector visual
+    currentMissingPins = [];
+    defects.forEach(function(d){
+      var m = d.match(/pin #(\d+)/);
+      if(m) currentMissingPins.push(parseInt(m[1]));
+    });
+
+    // Update result box
+    var box = document.getElementById('resultBox');
+    var verdict = document.getElementById('resultVerdict');
+    box.className = 'result-box ' + (isPASS ? 'pass' : 'fail');
+    if(!isPASS){ box.classList.add('shake'); setTimeout(function(){ box.classList.remove('shake'); },500); }
+    verdict.className = 'result-verdict ' + (isPASS ? 'pass' : 'fail');
+    verdict.textContent = isPASS ? 'PASS' : 'FAIL';
+
+    // Confidence
+    var confBar = document.getElementById('confBar');
+    document.getElementById('confPct').textContent = conf + '%';
+    confBar.style.background = isPASS
+      ? 'linear-gradient(90deg,#00d4ff,#00ff88)'
+      : 'linear-gradient(90deg,#ff3b5c,#ff8c42)';
+    confBar.style.width = conf + '%';
+
+    // Pins
+    var pd = document.getElementById('pinsDisplay');
+    pd.textContent = pinCount + ' / 20 PINS';
+    pd.className = 'pins-display ' + (isPASS ? 'ok' : 'bad');
+
+    // Time
+    document.getElementById('inspTime').textContent = 'Inspection time: ' + elapsed + ' ms';
+
+    // Defect list
+    var dl = document.getElementById('defectList');
+    dl.innerHTML = '';
+    defects.forEach(function(d){
+      var div = document.createElement('div');
+      div.className = 'defect-item';
+      div.textContent = '▸ ' + d;
+      dl.appendChild(div);
+    });
+
+    // Update stats
+    stats.total++;
+    if(isPASS) stats.passed++; else stats.failed++;
+    stats.confSum += conf;
+    updateStats();
+
+    // Add history row
+    addHistoryRow(isPASS, defects, conf);
+
+    inspecting = false;
+    btn.disabled = false;
+    btn.textContent = '⬡ Capture & Inspect';
+  }, 850);
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent  = stats.total;
+  document.getElementById('statPassed').textContent = stats.passed;
+  document.getElementById('statFailed').textContent = stats.failed;
+  var avgConf = stats.total ? Math.round(stats.confSum/stats.total) : 0;
+  document.getElementById('statConf').textContent = stats.total ? avgConf+'%' : '—';
+  var rate = stats.total ? Math.round((stats.passed/stats.total)*100) : 0;
+  drawGauge(rate);
+}
+
+function addHistoryRow(isPASS, defects, conf) {
+  var now = new Date();
+  var t = [now.getHours(),now.getMinutes(),now.getSeconds()]
+    .map(function(n){return('0'+n).slice(-2);}).join(':');
+
+  history.unshift({ n:stats.total, t:t, pass:isPASS, defects:defects, conf:conf });
+  if(history.length>20) history.pop();
+
+  renderHistory();
+}
+
+function renderHistory() {
+  var body = document.getElementById('historyBody');
+  body.innerHTML = '';
+  history.forEach(function(row){
+    var div = document.createElement('div');
+    div.className = 'history-row';
+    var defStr = row.defects.length ? row.defects[0]+(row.defects.length>1?' (+1)':'') : '—';
+    div.innerHTML =
+      '<span>#'+row.n+'</span>'+
+      '<span>'+row.t+'</span>'+
+      '<span><span class="pill '+(row.pass?'pass':'fail')+'">'+(row.pass?'PASS':'FAIL')+'</span></span>'+
+      '<span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+defStr+'</span>'+
+      '<span>'+row.conf+'%</span>';
+    body.appendChild(div);
+  });
+}
+
+// ── Controls ───────────────────────────────────────────────────────────────
+document.getElementById('captureBtn').addEventListener('click', function(){
+  clearTimeout(autoTimer);
+  runInspection();
+  scheduleAuto();
+});
+
+document.getElementById('resetBtn').addEventListener('click', function(){
+  stats = { total:0, passed:0, failed:0, confSum:0 };
+  history = [];
+  currentMissingPins = [];
+  document.getElementById('historyBody').innerHTML = '';
+  document.getElementById('resultBox').className = 'result-box';
+  document.getElementById('resultVerdict').className = 'result-verdict idle';
+  document.getElementById('resultVerdict').textContent = 'READY';
+  document.getElementById('confPct').textContent = '—';
+  document.getElementById('confBar').style.width = '0%';
+  document.getElementById('pinsDisplay').textContent = '— / 20 PINS';
+  document.getElementById('inspTime').textContent = 'Awaiting inspection';
+  document.getElementById('defectList').innerHTML = '';
+  updateStats();
+});
+
+// ── Auto-run every 4s ──────────────────────────────────────────────────────
+function scheduleAuto() {
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(function(){
+    runInspection();
+    scheduleAuto();
+  }, 4000);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+window.addEventListener('load', function(){
+  resizeCam();
+  drawGauge(0);
+  animateCam();
+  setTimeout(function(){
+    runInspection();
+    scheduleAuto();
+  }, 1200);
+});
+
+window.addEventListener('resize', function(){
+  resizeCam();
+});
+</script>
+</body>
+</html>
