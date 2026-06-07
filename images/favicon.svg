@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#0a0a0a"/>
+  
+  <!-- DP Text -->
+  <text x="16" y="24" font-family="'Bebas Neue', sans-serif, Arial Black" font-size="26" font-weight="700" letter-spacing="0.05em" fill="#FF6B00" text-anchor="middle" dominant-baseline="middle">DP</text>
+  
+  <!-- Optional: Border accent -->
+  <rect width="32" height="32" fill="none" stroke="#FF6B00" stroke-width="1" opacity="0.3"/>
+</svg>
