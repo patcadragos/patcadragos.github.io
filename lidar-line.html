@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiDAR Sensor Production Line — Project Details</title>
+  <link rel="icon" type="image/svg+xml" href="./images/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="lightbox.css">
+  <style>
+    :root {
+      --accent:      #FF6B00;
+      --accent-dark: #d45a00;
+      --accent-lt:   #ff7d1a;
+      --bg:          #0a0a0a;
+      --text:        #e8e8e8;
+      --text-sec:    #b8b8b8;
+      --border:      rgba(255,107,0,0.2);
+      --border-lt:   rgba(255,107,0,0.1);
+      --blue:        #2A8FCC;
+      --blue-lt:     #5BB5E0;
+      --pass:        #22C55E;
+      --fail:        #EF4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); margin-bottom: 1.5rem; }
+    h3 { font-size: 1.1rem; font-family: 'Space Mono', monospace; letter-spacing: 0.08em; }
+
+    p { color: var(--text-sec); margin-bottom: 1.4rem; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-lt); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(10,10,10,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, var(--accent), var(--accent-lt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      padding: 0.38rem 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.25s;
+    }
+    .nav-back::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: var(--accent);
+      z-index: -1;
+      transition: left 0.25s ease;
+    }
+    .nav-back:hover { color: #0a0a0a; }
+    .nav-back:hover::before { left: 0; }
+
+    /* ── HERO IMAGE ── */
+    .hero-image {
+      width: 100%;
+      margin-top: 60px;
+      height: clamp(280px, 38vw, 560px);
+      overflow: hidden;
+      position: relative;
+      background: #0d1117;
+    }
+    .hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .hero-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(10,10,10,0.7) 100%);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-hero {
+      padding: 4rem 2rem 3rem;
+      background: linear-gradient(180deg, #0f0f0f 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .page-hero .client-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      border: 1px solid rgba(42,143,204,0.35);
+      background: rgba(42,143,204,0.07);
+      padding: 0.35rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .page-hero h1 {
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-hero p { font-size: 1.05rem; max-width: 660px; margin: 0 auto; }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .tech-tag {
+      display: inline-block;
+      padding: 0.4rem 0.9rem;
+      background: linear-gradient(135deg, rgba(255,107,0,0.14), rgba(255,107,0,0.04));
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── CONTAINER & SECTIONS ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 2rem; }
+    section { padding: 4.5rem 2rem; }
+    section + section { border-top: 1px solid var(--border-lt); }
+
+    .section-header { position: relative; padding-left: 1.6rem; margin-bottom: 2rem; }
+    .section-header::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 4px; height: 100%;
+      max-height: 52px;
+      background: var(--accent);
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* ── TWO COLUMN ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+
+    /* ── FEATURE LIST ── */
+    .feature-list { list-style: none; margin: 1.2rem 0; }
+    .feature-list li {
+      position: relative;
+      padding-left: 1.4rem;
+      margin-bottom: 0.65rem;
+      color: var(--text-sec);
+      font-size: 0.95rem;
+    }
+    .feature-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.8rem;
+      top: 0.1em;
+    }
+
+    /* ── PIPELINE ── */
+    .pipeline { display: flex; flex-direction: column; gap: 0; margin: 2rem 0; }
+    .pipeline-step { display: flex; align-items: flex-start; gap: 1.2rem; position: relative; }
+    .pipeline-step:not(:last-child) { padding-bottom: 1.8rem; }
+    .pipeline-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px; top: 38px; bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), rgba(255,107,0,0.15));
+    }
+    .step-num {
+      width: 40px; height: 40px; min-width: 40px;
+      background: rgba(255,107,0,0.12);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--accent);
+    }
+    .step-content h3 { font-size: 0.95rem; color: var(--text); margin-bottom: 0.35rem; }
+    .step-content p { font-size: 0.88rem; margin: 0; line-height: 1.6; }
+
+    /* ── CODE SNIPPETS ── */
+    .snippet-block { margin-bottom: 2.8rem; }
+    .snippet-label {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent);
+      padding: 0.35rem 0.9rem;
+      background: rgba(255,107,0,0.1);
+      border: 1px solid var(--border);
+      border-bottom: none;
+    }
+    .snippet-label span { color: var(--text-sec); font-size: 0.65rem; }
+    .snippet-block pre { margin: 0; border: 1px solid var(--border); border-radius: 0 4px 4px 4px; overflow-x: auto; }
+    .snippet-block pre code.hljs { font-family: 'Space Mono', monospace; font-size: 0.82rem; line-height: 1.65; padding: 1.4rem 1.6rem; background: #0d0d0d; }
+    .snippet-desc { margin-top: 0.7rem; font-size: 0.9rem; color: var(--text-sec); }
+
+    /* ── VERDICT / KPI CARDS ── */
+    .verdict-row { display: flex; gap: 1.5rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .verdict-card { flex: 1; min-width: 200px; padding: 1.4rem 1.6rem; border: 1px solid; position: relative; overflow: hidden; }
+    .verdict-card.pass { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.05); }
+    .verdict-card.fail { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); }
+    .verdict-card .v-label { font-family: 'Orbitron', monospace; font-size: 1.5rem; font-weight: 900; letter-spacing: 3px; margin-bottom: 0.5rem; }
+    .verdict-card.pass .v-label { color: var(--pass); }
+    .verdict-card.fail .v-label { color: var(--fail); }
+    .verdict-card p { font-size: 0.85rem; margin: 0; }
+
+    /* ── TECH TABLE ── */
+    .tech-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    .tech-table th, .tech-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-lt); font-size: 0.9rem; }
+    .tech-table th { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: rgba(255,107,0,0.05); }
+    .tech-table td { color: var(--text-sec); }
+    .tech-table td:first-child { color: var(--text); font-weight: 600; }
+
+    /* ── METRIC GRID ── */
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .metric-card { padding: 1.2rem 1.4rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-lt); }
+    .metric-card .m-title { font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-sec); margin-bottom: 0.4rem; }
+    .metric-card .m-val { font-family: 'Orbitron', monospace; font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+    .metric-card .m-desc { font-size: 0.8rem; color: var(--text-sec); margin-top: 0.25rem; }
+
+    /* ── SCREENSHOT WRAP ── */
+    .hmi-wrap { border: 1px solid var(--border); overflow: hidden; margin: 2rem 0; position: relative; }
+    .hmi-wrap img { width: 100%; height: auto; display: block; transition: opacity 0.22s ease, transform 0.35s ease; }
+    .hmi-wrap[data-lightbox] { cursor: pointer; }
+    .hmi-wrap[data-lightbox]:hover img { opacity: 0.85; transform: scale(1.015); }
+    .hmi-caption { padding: 0.6rem 1rem; background: rgba(255,107,0,0.07); border-top: 1px solid var(--border); font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--text-sec); letter-spacing: 0.05em; }
+
+    /* ── CTA ── */
+    .cta-section { text-align: center; padding: 5rem 2rem; background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,107,0,0.06) 0%, transparent 70%); border-top: 1px solid var(--border); }
+    .cta-section h2 { margin-bottom: 0.5rem; }
+    .cta-section p { max-width: 460px; margin: 0 auto 2.5rem; }
+    .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-hud-wrap { position: relative; display: inline-block; }
+    .btn-hud-wrap::before, .btn-hud-wrap::after { content: ''; position: absolute; width: 9px; height: 9px; border-color: rgba(255,107,0,0.5); border-style: solid; }
+    .btn-hud-wrap::before { top: -5px; right: -5px; border-width: 2px 2px 0 0; }
+    .btn-hud-wrap::after  { bottom: -5px; left: -5px; border-width: 0 0 2px 2px; }
+    .btn-hud {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 16px 48px;
+      font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900; letter-spacing: 4px;
+      color: #0a0a0a; background: var(--accent); border: none; cursor: pointer;
+      text-transform: uppercase; text-decoration: none;
+      clip-path: polygon(14px 0%, 100% 0%, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0% 100%, 0% 14px);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+    .btn-hud:hover { background: #ff8533; box-shadow: 5px 5px 0 var(--accent), 10px 10px 0 rgba(255,107,0,0.25); color: #0a0a0a; }
+    .btn-hud:active { background: var(--accent-dark); transform: translate(2px, 2px); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 16px 36px;
+      font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      color: var(--accent); background: transparent; border: 1.5px solid var(--border); cursor: pointer;
+      text-transform: uppercase; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--accent); background: rgba(255,107,0,0.06); color: var(--accent-lt); }
+
+    /* ── FOOTER ── */
+    footer { padding: 2.5rem 2rem; text-align: center; border-top: 1px solid var(--border); background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(255,107,0,0.02)); }
+    footer p { font-family: 'Space Mono', monospace; font-size: 0.8rem; margin: 0; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 1.2rem; }
+      .two-col { grid-template-columns: 1fr; gap: 2rem; }
+      section { padding: 3rem 1.5rem; }
+      .btn-hud { padding: 14px 32px; font-size: 11px; }
+      .verdict-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">DRAGOS</a>
+  <a href="index.html#projects" class="nav-back">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Projects
+  </a>
+</nav>
+
+<!-- HERO IMAGE -->
+<div class="hero-image">
+  <img src="images/lidar-hmi.png" alt="LiDAR Sensor Production Line HMI" loading="eager">
+  <div class="hero-image-overlay"></div>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <div class="client-badge">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Advanced Programming 2026 · Robobist P1000
+    </div>
+    <h1>LiDAR Sensor Production Line</h1>
+    <p>A full digital-twin simulation of a five-stage manufacturing line that assembles the 360° LiDAR sensor used in the Robobist P1000 autonomous pallet truck. A multithreaded Python backend, a professional dark-theme industrial HMI, dual-PID thermal control, and a complete SCADA / Quality-Control / CMMS stack feeding real-time InfluxDB + Grafana telemetry.</p>
+    <div class="tech-tags">
+      <span class="tech-tag">Python</span>
+      <span class="tech-tag">Tkinter</span>
+      <span class="tech-tag">PID Control</span>
+      <span class="tech-tag">InfluxDB</span>
+      <span class="tech-tag">Grafana</span>
+      <span class="tech-tag">SQLite</span>
+      <span class="tech-tag">Docker</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1 — OVERVIEW -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Project Overview</div>
+      <h2>What it does</h2>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <p>
+          The Robobist P1000 navigates with a 360° LiDAR sensor. This project simulates the factory line that
+          builds that sensor — five sequential stations, each with its own cycle time, defect signature, and
+          quality gate. Parts flow through bounded queues on dedicated worker threads, exactly as a real PLC-driven
+          line would sequence its stations.
+        </p>
+        <p>
+          Every station inspects its part and can mark it <strong>DEFECTIVE</strong> with a specific, human-readable
+          reason — <code>solder_bridge</code>, <code>bearing_noise</code>, <code>scan_uniformity_fail</code>, and so
+          on. The verdict, the defect type, and the part ID are written to the alarm log and pushed to the telemetry
+          stack in real time.
+        </p>
+        <ul class="feature-list">
+          <li>Five stations: Housing · PCB · Motor · Electronics · Calibration</li>
+          <li>Multithreaded queue-based flow with back-pressure</li>
+          <li>Dual PID loops hold motor (45 °C) and laser (25 °C) temperature</li>
+          <li>Over-temperature and E-STOP faults latch the whole line</li>
+          <li>Every defect is logged with its station and root cause</li>
+        </ul>
+      </div>
+
+      <div>
+        <p>
+          The product is the Robobist sensor, so the HMI wears the real Robobist brand — logo, the Inter typeface,
+          and the #F36D21 orange. It is built to look and behave like a production SCADA terminal, not a class demo.
+        </p>
+        <div class="verdict-row">
+          <div class="verdict-card pass">
+            <div class="v-label">OK</div>
+            <p>Part passed every station inspection and reached Calibration within spec — counted toward First-Pass Yield.</p>
+          </div>
+          <div class="verdict-card fail">
+            <div class="v-label">DEFECT</div>
+            <p>A station flagged a fault (missing component, torque out of spec, range error…) — rejected with a logged reason.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2 — HMI -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Frontend</div>
+      <h2>The industrial HMI</h2>
+    </div>
+    <p>
+      A single-screen operator terminal built in Tkinter. Live production flow with per-station counters and a
+      processing animation, a thermal-monitoring chart, SCADA alarm acknowledgement, live temperature setpoint
+      control, an embedded CMMS panel, and the four mandatory machine controls: <strong>START · STOP · RESET ·
+      E-STOP</strong>.
+    </p>
+    <div class="hmi-wrap" data-lightbox="lidar" data-lb-alt="LiDAR Sensor Production Line — main HMI">
+      <img src="images/lidar-hmi.png" alt="LiDAR Production Line HMI">
+      <div class="hmi-caption">// Main HMI — production flow, KPIs (First-Pass Yield, OEE), thermal chart, setpoints, alarm log with ACK, CMMS</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 — BACKEND / PIPELINE -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Backend Architecture</div>
+      <h2>Five-stage pipeline</h2>
+    </div>
+
+    <p>The backend is fully decoupled from the HMI. The line is a set of worker threads connected by bounded queues; the HMI only reads a shared <code>ProductionMetrics</code> snapshot and drains alarms. Station behaviour is pure data, so adding or retuning a stage never touches the engine.</p>
+
+    <div class="two-col" style="align-items:center; gap:4rem;">
+      <div class="pipeline">
+        <div class="pipeline-step">
+          <div class="step-num">01</div>
+          <div class="step-content"><h3>Housing Machining</h3><p>CNC-machined enclosure. Defects: dimensional tolerance, surface roughness, material crack.</p></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">02</div>
+          <div class="step-content"><h3>PCB Assembly</h3><p>Populates the sensor board. Defects: solder bridge, missing component, misalignment.</p></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">03</div>
+          <div class="step-content"><h3>Motor Assembly</h3><p>360° rotation motor. Defects: bearing noise, torque out of spec, encoder error.</p></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">04</div>
+          <div class="step-content"><h3>Electronics Integration</h3><p>Firmware + power. Defects: firmware flash fail, voltage out of spec, connector fault.</p></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">05</div>
+          <div class="step-content"><h3>Calibration &amp; Testing</h3><p>Final range/angle test. Defects: range accuracy, angular resolution, scan uniformity.</p></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="snippet-block" style="margin-bottom:0">
+          <div class="snippet-label">prod.py <span>/ defect detection</span></div>
+          <pre><code class="language-python"># each station inspects the part and tags a reason
+is_defect = random.random() &lt; cfg["defect_rate"]
+if is_defect:
+    sensor.quality = Quality.DEFECTIVE
+    defect = random.choice(cfg["defects"])
+    sensor.defect_reason = f"{cfg['short_name']}: {defect}"
+    self._add_alarm(
+        "WARNING",
+        f"Defect @ {cfg['short_name']} "
+        f"&mdash; {defect}  [ID:{sensor.sensor_id}]",
+    )
+
+with self._lock:
+    self.metrics.total_inspected += 1
+    if is_defect:                       # Quality-Control aggregates
+        self.metrics.total_rejects += 1
+        key = f"{cfg['short_name']}: {defect}"
+        self.metrics.defect_by_type[key] = \
+            self.metrics.defect_by_type.get(key, 0) + 1</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4 — PID -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Control Theory</div>
+      <h2>Dual-PID thermal control</h2>
+    </div>
+    <p>The motor and laser each run a software PID loop. A heater drives the temperature toward its setpoint while passive cooling pulls it back to ambient, so the loop settles at the target with realistic noise. Cross a hard limit and the line latches a FAULT. The operator can retune setpoints live from the HMI — true supervisory control.</p>
+    <div class="snippet-block">
+      <div class="snippet-label">prod.py <span>/ PIDController.compute()</span></div>
+      <pre><code class="language-python">def compute(self, measured: float) -> float:
+    now = time.time()
+    dt = max(now - self._last_time, 1e-3)
+    error = self.setpoint - measured
+    self._integral += error * dt
+    derivative = (error - self._prev_error) / dt
+    output = (self.kp * error
+              + self.ki * self._integral
+              + self.kd * derivative)
+    output = max(self.out_min, min(self.out_max, output))
+    self._prev_error, self._last_time = error, now
+    return output</code></pre>
+      <p class="snippet-desc">Anti-windup clamping and a guarded <code>dt</code> keep the loop stable across variable UI frame rates.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5 — OPTIONAL MODULES -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Optional Modules</div>
+      <h2>Quality Control · SCADA · CMMS</h2>
+    </div>
+    <p>All three optional modules from the brief are implemented as first-class features rather than checkboxes.</p>
+
+    <div class="hmi-wrap" data-lightbox="lidar" data-lb-alt="Quality Control — defect analytics window">
+      <img src="images/lidar-qc.png" alt="Quality Control defect analytics">
+      <div class="hmi-caption">// Quality Control — First-Pass Yield, OEE, defect Pareto by type, per-station yield table</div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card"><div class="m-title">Quality Control</div><div class="m-val" style="color:var(--pass);">FPY</div><div class="m-desc">First-Pass Yield, defect Pareto, per-station yield, reject tracking</div></div>
+      <div class="metric-card"><div class="m-title">SCADA</div><div class="m-val">ACK</div><div class="m-desc">Alarm acknowledgement, live setpoint control, OEE supervision</div></div>
+      <div class="metric-card"><div class="m-title">CMMS</div><div class="m-val" style="color:var(--blue-lt);">SQL</div><div class="m-desc">SQLite maintenance schedules, step procedures, operator logs</div></div>
+      <div class="metric-card"><div class="m-title">OEE</div><div class="m-val">A·P·Q</div><div class="m-desc">Availability × Performance × Quality, computed live</div></div>
+    </div>
+
+    <div class="hmi-wrap" data-lightbox="lidar" data-lb-alt="CMMS maintenance management window">
+      <img src="images/lidar-cmms.png" alt="CMMS maintenance management">
+      <div class="hmi-caption">// CMMS — SQLite-backed maintenance scheduling, due/overdue status, step-by-step procedures, operator logging</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6 — TELEMETRY -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Telemetry Stack</div>
+      <h2>InfluxDB + Grafana</h2>
+    </div>
+    <p>
+      The HMI writes a metrics point to InfluxDB 2.7 every five seconds — temperatures, machine state, parts, defect
+      rate, throughput, First-Pass Yield, OEE and rejects. Grafana (auto-provisioned through Docker Compose) renders
+      a nine-panel dashboard on a five-second refresh. The whole stack starts with one command:
+    </p>
+    <pre style="border:1px solid var(--border-lt); padding:1rem 1.2rem; font-family:'Space Mono',monospace; font-size:0.82rem; color:var(--accent); background:#0d0d0d; margin-bottom:1.6rem;"><code>docker compose up -d</code></pre>
+    <div class="hmi-wrap" data-lightbox="lidar" data-lb-alt="Grafana dashboard — nine live panels">
+      <img src="images/lidar-grafana.png" alt="Grafana dashboard">
+      <div class="hmi-caption">// Grafana — temperatures, machine state, parts, defect rate, throughput, OEE, First-Pass Yield, rejects</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 7 — TECH STACK -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Technology Stack</div>
+      <h2>What it's built with</h2>
+    </div>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>Technology</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>Backend</td><td>Python 3 · threading · queue</td><td>Multithreaded line engine, defect logic, PID loops</td></tr>
+        <tr><td>HMI / GUI</td><td>Tkinter · Pillow · Matplotlib</td><td>Dark industrial terminal, flow canvas, thermal chart</td></tr>
+        <tr><td>Maintenance</td><td>SQLite (CMMS)</td><td>Schedules, procedures, operator maintenance logs</td></tr>
+        <tr><td>Telemetry DB</td><td>InfluxDB 2.7</td><td>Time-series storage of every metric, 5 s cadence</td></tr>
+        <tr><td>Dashboards</td><td>Grafana 11</td><td>9 auto-provisioned panels, 5 s refresh</td></tr>
+        <tr><td>Containerisation</td><td>Docker Compose</td><td>One-command InfluxDB + Grafana stack</td></tr>
+        <tr><td>Branding</td><td>Inter · Segoe Fluent Icons</td><td>Real Robobist look — logo, font, #F36D21 accent</td></tr>
+        <tr><td>Platform</td><td>Windows 11</td><td>Python 3.14 · tested end-to-end</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="container">
+    <h2>View the source</h2>
+    <p>Full codebase — backend engine, HMI, CMMS, Grafana dashboard JSON, and the Docker Compose telemetry stack.</p>
+    <div class="btn-group">
+      <div class="btn-hud-wrap">
+        <a href="https://github.com/patcadragos/lidar-sensor-production-line" target="_blank" rel="noopener noreferrer" class="btn-hud">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+      <a href="index.html#projects" class="btn-outline">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        All Projects
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>© 2026 Dragos Patca &nbsp;·&nbsp; Built with Python · Tkinter · InfluxDB · Grafana · Docker</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="lightbox.js"></script>
+<script>
+  hljs.highlightAll();
+  Lightbox.init();
+</script>
+</body>
+</html>
