@@ -27,7 +27,7 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
 
     body {
       font-family: 'DM Sans', sans-serif;
@@ -35,7 +35,19 @@
       color: var(--text);
       line-height: 1.7;
       overflow-x: hidden;
+      width: 100%;
     }
+
+    /* ── Mobile overflow safety ──────────────────────────────
+       Long code lines and flex/grid children must never widen the
+       page past the viewport — otherwise iOS Safari zooms the whole
+       page out. Let containers shrink and let code scroll internally. */
+    .two-col, .two-col > *,
+    .pipeline, .pipeline-step, .step-content,
+    .snippet-block { min-width: 0; }
+
+    pre { max-width: 100%; overflow-x: auto; }
+    img, video, table { max-width: 100%; }
 
     h1, h2, h3 {
       font-family: 'Bebas Neue', sans-serif;
