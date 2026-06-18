@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vision Security — Perimeter Safety System · Project Details</title>
+  <link rel="icon" type="image/svg+xml" href="./images/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="lightbox.css">
+  <style>
+    :root {
+      --accent:      #FF6B00;
+      --accent-dark: #d45a00;
+      --accent-lt:   #ff7d1a;
+      --bg:          #0a0a0a;
+      --text:        #e8e8e8;
+      --text-sec:    #b8b8b8;
+      --border:      rgba(255,107,0,0.2);
+      --border-lt:   rgba(255,107,0,0.1);
+      --warn:        #ff9f0a;
+      --warn-lt:     #ffc04d;
+      --crit:        #ff453a;
+      --safe:        #30d158;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); margin-bottom: 1.5rem; }
+    h3 { font-size: 1.1rem; font-family: 'Space Mono', monospace; letter-spacing: 0.08em; }
+
+    p { color: var(--text-sec); margin-bottom: 1.4rem; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-lt); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(10,10,10,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, var(--accent), var(--accent-lt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      padding: 0.38rem 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.25s;
+    }
+    .nav-back::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: var(--accent);
+      z-index: -1;
+      transition: left 0.25s ease;
+    }
+    .nav-back:hover { color: #0a0a0a; }
+    .nav-back:hover::before { left: 0; }
+
+    /* ── VIDEO HERO (first thing on the page) ── */
+    .video-hero {
+      width: 100%;
+      margin-top: 60px;
+      background: #000;
+      border-bottom: 1px solid var(--border);
+      padding: 0 0 0.75rem;
+    }
+    .video-hero-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .video-hero video {
+      width: 100%;
+      display: block;
+      background: #000;
+    }
+    .video-hero-cap {
+      max-width: 1120px;
+      margin: 0.7rem auto 0;
+      padding: 0 1.2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.04em;
+      color: var(--text-sec);
+      text-align: center;
+    }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+      padding: 3.5rem 2rem 3rem;
+      background: linear-gradient(180deg, #0f0f0f 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .page-hero .client-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--crit);
+      border: 1px solid rgba(255,69,58,0.35);
+      background: rgba(255,69,58,0.07);
+      padding: 0.35rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .page-hero h1 {
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-hero p { font-size: 1.05rem; max-width: 680px; margin: 0 auto; }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .tech-tag {
+      display: inline-block;
+      padding: 0.4rem 0.9rem;
+      background: linear-gradient(135deg, rgba(255,107,0,0.14), rgba(255,107,0,0.04));
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── CONTAINER & SECTIONS ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 2rem; }
+    section { padding: 4.5rem 2rem; }
+    section + section { border-top: 1px solid var(--border-lt); }
+
+    .section-header { position: relative; padding-left: 1.6rem; margin-bottom: 2rem; }
+    .section-header::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 4px; height: 100%;
+      max-height: 52px;
+      background: var(--accent);
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* ── TWO COLUMN ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+
+    /* ── FEATURE LIST ── */
+    .feature-list { list-style: none; margin: 1.2rem 0; }
+    .feature-list li {
+      position: relative;
+      padding-left: 1.4rem;
+      margin-bottom: 0.65rem;
+      color: var(--text-sec);
+      font-size: 0.95rem;
+    }
+    .feature-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.8rem;
+      top: 0.1em;
+    }
+
+    /* ── ZONE DIAGRAM ── */
+    .zone-diagram {
+      border: 1px solid var(--border);
+      background:
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0 10px, transparent 10px 20px),
+        #0d0d0d;
+      padding: 2.2rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .zone-ring {
+      width: 100%;
+      max-width: 360px;
+      border: 2px dashed var(--warn);
+      background: rgba(255,159,10,0.06);
+      border-radius: 14px;
+      padding: 1.5rem 1.2rem;
+      text-align: center;
+    }
+    .zone-ring .z-tag { color: var(--warn-lt); }
+    .zone-core {
+      margin-top: 1.2rem;
+      width: 78%;
+      border: 2px solid var(--crit);
+      background: rgba(255,69,58,0.1);
+      border-radius: 10px;
+      padding: 1.6rem 1rem;
+      text-align: center;
+    }
+    .zone-core .z-tag { color: var(--crit); }
+    .z-tag { font-family: 'Orbitron', monospace; font-size: 0.95rem; font-weight: 900; letter-spacing: 2px; display: block; margin-bottom: 0.2rem; }
+    .z-sub { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--text-sec); letter-spacing: 0.05em; }
+
+    /* ── STATE / VERDICT CARDS ── */
+    .verdict-row { display: flex; gap: 1.5rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .verdict-card { flex: 1; min-width: 200px; padding: 1.4rem 1.6rem; border: 1px solid; position: relative; overflow: hidden; }
+    .verdict-card.warn { border-color: rgba(255,159,10,0.35); background: rgba(255,159,10,0.06); }
+    .verdict-card.crit { border-color: rgba(255,69,58,0.35); background: rgba(255,69,58,0.06); }
+    .verdict-card .v-label { font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900; letter-spacing: 3px; margin-bottom: 0.5rem; }
+    .verdict-card.warn .v-label { color: var(--warn-lt); }
+    .verdict-card.crit .v-label { color: var(--crit); }
+    .verdict-card p { font-size: 0.85rem; margin: 0; }
+
+    /* ── PIPELINE ── */
+    .pipeline { display: flex; flex-direction: column; gap: 0; margin: 0.5rem 0; }
+    .pipeline-step { display: flex; align-items: flex-start; gap: 1.2rem; position: relative; }
+    .pipeline-step:not(:last-child) { padding-bottom: 1.8rem; }
+    .pipeline-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px; top: 38px; bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), rgba(255,107,0,0.15));
+    }
+    .step-num {
+      width: 40px; height: 40px; min-width: 40px;
+      background: rgba(255,107,0,0.12);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--accent);
+    }
+    .step-content h3 { font-size: 0.95rem; color: var(--text); margin-bottom: 0.35rem; }
+    .step-content p { font-size: 0.88rem; margin: 0; line-height: 1.6; }
+
+    /* ── CODE SNIPPETS ── */
+    .snippet-block { margin-bottom: 2.8rem; }
+    .snippet-block:last-child { margin-bottom: 0; }
+    .snippet-label {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent);
+      padding: 0.35rem 0.9rem;
+      background: rgba(255,107,0,0.1);
+      border: 1px solid var(--border);
+      border-bottom: none;
+    }
+    .snippet-label span { color: var(--text-sec); font-size: 0.65rem; }
+    .snippet-block pre { margin: 0; border: 1px solid var(--border); border-radius: 0 4px 4px 4px; overflow-x: auto; }
+    .snippet-block pre code.hljs { font-family: 'Space Mono', monospace; font-size: 0.82rem; line-height: 1.65; padding: 1.4rem 1.6rem; background: #0d0d0d; }
+    .snippet-desc { margin-top: 0.7rem; font-size: 0.9rem; color: var(--text-sec); }
+
+    /* ── TECH TABLE ── */
+    .tech-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    .tech-table th, .tech-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-lt); font-size: 0.9rem; }
+    .tech-table th { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: rgba(255,107,0,0.05); }
+    .tech-table td { color: var(--text-sec); }
+    .tech-table td:first-child { color: var(--text); font-weight: 600; }
+
+    /* ── METRIC GRID ── */
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .metric-card { padding: 1.2rem 1.4rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-lt); }
+    .metric-card .m-title { font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-sec); margin-bottom: 0.4rem; }
+    .metric-card .m-val { font-family: 'Orbitron', monospace; font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+    .metric-card .m-desc { font-size: 0.8rem; color: var(--text-sec); margin-top: 0.25rem; }
+
+    /* ── SCREENSHOT WRAP ── */
+    .hmi-wrap { border: 1px solid var(--border); overflow: hidden; margin: 2rem 0 0; position: relative; }
+    .hmi-wrap img { width: 100%; height: auto; display: block; transition: opacity 0.22s ease, transform 0.35s ease; }
+    .hmi-wrap[data-lightbox] { cursor: pointer; }
+    .hmi-wrap[data-lightbox]:hover img { opacity: 0.85; transform: scale(1.01); }
+    .hmi-caption { padding: 0.6rem 1rem; background: rgba(255,107,0,0.07); border-top: 1px solid var(--border); font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--text-sec); letter-spacing: 0.05em; }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-left: 3px solid var(--crit);
+      background: rgba(255,69,58,0.06);
+      padding: 1.1rem 1.3rem;
+      margin: 1.6rem 0;
+      font-size: 0.92rem;
+      color: var(--text-sec);
+    }
+    .callout strong { color: var(--text); }
+
+    /* ── CTA ── */
+    .cta-section { text-align: center; padding: 5rem 2rem; background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,107,0,0.06) 0%, transparent 70%); border-top: 1px solid var(--border); }
+    .cta-section h2 { margin-bottom: 0.5rem; }
+    .cta-section p { max-width: 460px; margin: 0 auto 2.5rem; }
+    .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-hud-wrap { position: relative; display: inline-block; }
+    .btn-hud-wrap::before, .btn-hud-wrap::after { content: ''; position: absolute; width: 9px; height: 9px; border-color: rgba(255,107,0,0.5); border-style: solid; }
+    .btn-hud-wrap::before { top: -5px; right: -5px; border-width: 2px 2px 0 0; }
+    .btn-hud-wrap::after  { bottom: -5px; left: -5px; border-width: 0 0 2px 2px; }
+    .btn-hud {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 16px 48px;
+      font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900; letter-spacing: 4px;
+      color: #0a0a0a; background: var(--accent); border: none; cursor: pointer;
+      text-transform: uppercase; text-decoration: none;
+      clip-path: polygon(14px 0%, 100% 0%, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0% 100%, 0% 14px);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+    .btn-hud:hover { background: #ff8533; box-shadow: 5px 5px 0 var(--accent), 10px 10px 0 rgba(255,107,0,0.25); color: #0a0a0a; }
+    .btn-hud:active { background: var(--accent-dark); transform: translate(2px, 2px); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 16px 36px;
+      font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      color: var(--accent); background: transparent; border: 1.5px solid var(--border); cursor: pointer;
+      text-transform: uppercase; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--accent); background: rgba(255,107,0,0.06); color: var(--accent-lt); }
+
+    /* ── FOOTER ── */
+    footer { padding: 2.5rem 2rem; text-align: center; border-top: 1px solid var(--border); background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(255,107,0,0.02)); }
+    footer p { font-family: 'Space Mono', monospace; font-size: 0.8rem; margin: 0; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 1.2rem; }
+      .two-col { grid-template-columns: 1fr; gap: 2rem; }
+      section { padding: 3rem 1.5rem; }
+      .btn-hud { padding: 14px 32px; font-size: 11px; }
+      .verdict-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">DRAGOS</a>
+  <a href="index.html#projects" class="nav-back">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Projects
+  </a>
+</nav>
+
+<!-- VIDEO HERO — first thing on the page -->
+<section class="video-hero">
+  <div class="video-hero-inner">
+    <video src="videos/safety-vision-demo.mp4" poster="images/safety-vision-poster.png"
+           controls playsinline preload="metadata"></video>
+  </div>
+  <div class="video-hero-cap">// Live demo — armed monitoring, SLOW &amp; STOP escalation, two-tone alarm and automatic evidence capture &nbsp;·&nbsp; press play (audio included)</div>
+</section>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <div class="client-badge">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg>
+      Self-initiated · Life-safety vision
+    </div>
+    <h1>Vision Security — Perimeter Safety</h1>
+    <p>A real-time, camera-based person-detection safety system for protecting people who work next to dangerous machinery and robots. A webcam — or an industrial RTSP stream — watches a protected danger area; the instant someone crosses into the warning ring the machine is commanded to <strong>SLOW</strong>, and the moment they reach the critical zone it is commanded to <strong>STOP</strong>. Every state change is logged and an annotated evidence photo is captured.</p>
+    <div class="tech-tags">
+      <span class="tech-tag">Python</span>
+      <span class="tech-tag">YOLOv8</span>
+      <span class="tech-tag">FastAPI</span>
+      <span class="tech-tag">WebSocket</span>
+      <span class="tech-tag">OpenCV</span>
+      <span class="tech-tag">NumPy</span>
+      <span class="tech-tag">pywebview</span>
+      <span class="tech-tag">SQLite</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1 — OVERVIEW -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Project Overview</div>
+      <h2>What it does</h2>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <p>
+          Industrial machines hurt people who get too close. This system treats a protected area as a hazard:
+          a camera watches it continuously, a YOLOv8 model finds every person in frame, and a safety state
+          machine decides — frame by frame — whether the machine next to it should run, slow down, or stop.
+        </p>
+        <p>
+          It is built as <strong>life-safety software</strong>, not a demo: the pipeline fails safe, escalates
+          fast, releases slowly, and never lets a single noisy frame flicker the machine command. The whole thing
+          runs as a native desktop app and swaps a webcam for an industrial IP camera with one line of config.
+        </p>
+        <ul class="feature-list">
+          <li>Real-time person detection on every frame of the live feed</li>
+          <li>Two danger levels — WARNING / SLOW and CRITICAL / STOP</li>
+          <li>Operator draws the STOP zone; the SLOW ring is derived automatically</li>
+          <li>Clean <code>RUN / SLOW / STOP</code> command — the hook a real PLC or robot reads</li>
+          <li>Two-tone audio alarm, annotated evidence photos, full event log</li>
+        </ul>
+      </div>
+
+      <div>
+        <p>The committed safety level drives both the audible alarm and the machine command shown live in the UI:</p>
+        <div class="verdict-row">
+          <div class="verdict-card warn">
+            <div class="v-label">SLOW</div>
+            <p>A person's body touches the warning ring. A soft, low warning tone plays and the machine is told to slow down.</p>
+          </div>
+          <div class="verdict-card crit">
+            <div class="v-label">STOP</div>
+            <p>A person reaches the critical zone. A loud urgent siren plays, a red banner fills the screen and an evidence photo is saved.</p>
+          </div>
+        </div>
+        <p style="margin-top:1.4rem; font-size:0.92rem;">With several people in frame, the global state is always the <strong>most severe zone occupied by anyone</strong>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2 — SAFETY MODEL / ZONES -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Safety Model</div>
+      <h2>Two zones, one rule</h2>
+    </div>
+
+    <div class="two-col" style="align-items:center; gap:3.5rem;">
+      <div>
+        <p>
+          The operator draws <strong>only the critical (STOP) zone</strong>. The warning (SLOW) ring is
+          <strong>derived automatically</strong> as an outward buffer around it — every edge is offset outward
+          by <code>warning_buffer_px</code> and the corners re-intersected. This <em>geometrically guarantees</em>
+          that the warning ring fully surrounds the critical zone: a person can never reach STOP without first
+          crossing SLOW.
+        </p>
+        <p>
+          A person is classified by <strong>full bounding-box collision</strong> — not a single centre point.
+          The instant any part of the body, including an outstretched arm, touches a zone, that person counts as
+          inside it. Fail-safe by construction.
+        </p>
+        <div class="callout">
+          <strong>Why box-collision, not a point?</strong> A point can sit just outside a zone while the arm
+          is already inside the machine. Touching = inside is the safe assumption.
+        </div>
+      </div>
+
+      <div class="zone-diagram">
+        <div class="zone-ring">
+          <span class="z-tag">WARNING · SLOW</span>
+          <span class="z-sub">auto-derived buffer ring</span>
+          <div class="zone-core">
+            <span class="z-tag">CRITICAL · STOP</span>
+            <span class="z-sub">operator-drawn polygon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="snippet-block" style="margin-top:2.6rem;">
+      <div class="snippet-label">core/zone_manager.py <span>/ classify_box()</span></div>
+      <pre><code class="language-python">def classify_box(self, bbox):
+    """Classify a detection by full bounding-box collision with the zones."""
+    # CRITICAL the instant ANY part of the box touches the STOP polygon
+    if self.box_intersects_polygon(bbox, self._critical):
+        return LEVEL_CRITICAL, 0.0
+
+    feet = self.representative_point(bbox)
+    dist_crit = self._distance_to_polygon(feet, self._critical)
+
+    # otherwise WARNING if the box touches the auto-derived SLOW ring
+    if self.box_intersects_polygon(bbox, self._warning):
+        return LEVEL_WARNING, dist_crit
+
+    return LEVEL_SAFE, dist_crit</code></pre>
+      <p class="snippet-desc">Edge-segment intersection (plus a containment test) means a box counts as inside even when its centre is well outside the polygon.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 — STATE MACHINE -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Control Logic</div>
+      <h2>Flicker-free, fail-safe escalation</h2>
+    </div>
+    <p>
+      A perimeter feed is noisy — a person on the edge of a zone, or a single-frame false positive, must never
+      make the machine command oscillate STOP/RUN dozens of times a second. The raw observed level is passed
+      through an <strong>asymmetric-hysteresis state machine</strong> before it ever touches the alarm or the
+      machine command.
+    </p>
+
+    <div class="two-col" style="gap:3.5rem; margin-bottom:2.4rem;">
+      <div class="pipeline">
+        <div class="pipeline-step">
+          <div class="step-num">↑</div>
+          <div class="step-content"><h3>Escalation — fast</h3><p>Only a few confirming frames (<code>enter_frames</code>, default&nbsp;2), and it jumps straight to the highest level seen. Reach STOP quickly.</p></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">↓</div>
+          <div class="step-content"><h3>De-escalation — slow</h3><p>Many confirming frames (<code>exit_frames</code>, default&nbsp;10) and it steps down one level at a time. A brief detection drop-out never restarts a machine while a person is still in the zone.</p></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">≡</div>
+          <div class="step-content"><h3>Two parallel truths</h3><p>The committed level drives the alarm and machine command; the raw level still drives the live overlay, so the operator sees danger the instant it appears.</p></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="snippet-block" style="margin-bottom:0;">
+          <div class="snippet-label">core/safety_state.py <span>/ update()</span></div>
+          <pre><code class="language-python">observed = clamp(observed, SAFE, CRITICAL)
+
+if observed &gt; self._committed:        # escalate — fast
+    self._up_count += 1
+    self._down_count = 0
+    if self._up_count &gt;= self._enter:  # default 2 frames
+        self._committed = observed     # jump to highest seen
+        direction = "escalate"
+
+elif observed &lt; self._committed:      # de-escalate — slow
+    self._down_count += 1
+    self._up_count = 0
+    if self._down_count &gt;= self._exit: # default 10 frames
+        self._committed -= 1           # step down ONE level
+        direction = "deescalate"</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4 — PERFORMANCE -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Performance</div>
+      <h2>Evidence quality without inference lag</h2>
+    </div>
+    <p>
+      Two resolution streams are decoupled. The camera captures at full HD and that frame is kept untouched as
+      the source for evidence photos, while inference runs on a 640&nbsp;px downscale and the boxes are scaled
+      back up for the overlay. The feed stays fluid; the saved photos stay sharp.
+    </p>
+
+    <div class="metric-grid" style="margin-bottom:2.4rem;">
+      <div class="metric-card"><div class="m-title">Capture</div><div class="m-val">1080p</div><div class="m-desc">Untouched FHD frame — source for evidence photos</div></div>
+      <div class="metric-card"><div class="m-title">Inference</div><div class="m-val">640px</div><div class="m-desc">Long-side downscale; boxes scaled back to FHD</div></div>
+      <div class="metric-card"><div class="m-title">Detector</div><div class="m-val">YOLOv8n</div><div class="m-desc">Person class only · auto-downloaded on first run</div></div>
+      <div class="metric-card"><div class="m-title">Transport</div><div class="m-val">WS</div><div class="m-desc">JPEG frames + events + metrics over one WebSocket</div></div>
+    </div>
+
+    <div class="snippet-block">
+      <div class="snippet-label">core/detector.py <span>/ detect()</span></div>
+      <pre><code class="language-python"># capture stays full-res for evidence; inference runs on a 640px downscale
+with torch.inference_mode():               # no gradients — faster on CPU
+    results = self._model.predict(
+        frame,
+        imgsz=self.inference_size,         # long side -> 640px
+        conf=self.confidence_threshold,
+        classes=[PERSON_CLASS_ID],         # people only
+        verbose=False,
+    )
+# Ultralytics scales the boxes back to the original FHD frame for us</code></pre>
+      <p class="snippet-desc">Camera + inference run on a dedicated thread; the server stays async and joins the thread + releases the camera cleanly on shutdown.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5 — ALARM / EVIDENCE / LOG -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Alarm · Evidence · Log</div>
+      <h2>What happens when someone crosses the line</h2>
+    </div>
+    <div class="two-col">
+      <div>
+        <ul class="feature-list">
+          <li><strong>Two-tone audio</strong> — a loud urgent siren for CRITICAL / STOP and a softer, lower tone for WARNING / SLOW, played proportionally quieter.</li>
+          <li><strong>Generated on the fly</strong> — if no WAV is present the siren is synthesised with NumPy and cached, so the app never ships silent.</li>
+          <li><strong>Evidence photos</strong> — full-HD frame with timestamp, level, person count and bounding boxes burned in, saved to <code>captures/</code> with a cooldown to prevent spam.</li>
+          <li><strong>Event log</strong> — every transition written to SQLite (time, type, persons, level, photo) with one-click CSV export.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="hmi-wrap" data-lightbox="sv" data-lb-alt="Vision Security — live monitoring with a person in the warning zone">
+          <img src="images/safety-vision-poster.png" alt="Vision Security live monitoring UI">
+          <div class="hmi-caption">// Live UI — feed overlay with zones, status dashboard, controls, event log and the recent-captures gallery</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6 — INDUSTRIAL HOOK -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Built to Scale</div>
+      <h2>Webcam today, RTSP line tomorrow</h2>
+    </div>
+    <p>
+      The architecture is modular by design — detector, zone manager, state machine, alarm and capture are
+      independent and swappable. Switching from a laptop webcam to an industrial IP camera is a single config
+      change, no code edit:
+    </p>
+    <pre style="border:1px solid var(--border-lt); padding:1rem 1.2rem; font-family:'Space Mono',monospace; font-size:0.82rem; color:var(--accent); background:#0d0d0d; margin-bottom:1.6rem;"><code>"camera": { "rtsp_url": "rtsp://user:pass@192.168.1.50:554/stream1" }</code></pre>
+    <p style="margin-bottom:0;">
+      The <code>RUN / SLOW / STOP</code> command is already surfaced as a clean signal on every transition — the
+      exact hook a real PLC or robot controller would subscribe to.
+    </p>
+  </div>
+</section>
+
+<!-- SECTION 7 — TECH STACK -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Technology Stack</div>
+      <h2>What it's built with</h2>
+    </div>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>Technology</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>Detection</td><td>Ultralytics YOLOv8n · PyTorch</td><td>Real-time person detection on a 640px downscale</td></tr>
+        <tr><td>Vision I/O</td><td>OpenCV · NumPy</td><td>Camera / RTSP capture, frame scaling, overlay drawing</td></tr>
+        <tr><td>Backend</td><td>FastAPI · uvicorn · threading</td><td>Async server, dedicated camera + inference thread</td></tr>
+        <tr><td>Transport</td><td>WebSocket</td><td>Live frames, detections, metrics and events to the UI</td></tr>
+        <tr><td>Frontend</td><td>HTML · CSS · Vanilla JS</td><td>Frosted-glass UI, canvas overlay, polygon zone editor</td></tr>
+        <tr><td>Desktop shell</td><td>pywebview</td><td>Native desktop window — launches with <code>python main.py</code></td></tr>
+        <tr><td>Audio</td><td>pygame · NumPy</td><td>Non-blocking two-tone alarm, siren synthesised if missing</td></tr>
+        <tr><td>Persistence</td><td>SQLite</td><td>Event log + statistics, CSV export</td></tr>
+        <tr><td>Platform</td><td>Windows 11 · Python 3</td><td>Tested end-to-end with a live webcam</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="container">
+    <h2>View the source</h2>
+    <p>Full codebase — detector, zone manager, hysteresis state machine, two-tone alarm, capture and event log.</p>
+    <div class="btn-group">
+      <div class="btn-hud-wrap">
+        <a href="https://github.com/patcadragos/vision-perimeter-safety" target="_blank" rel="noopener noreferrer" class="btn-hud">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+      <a href="index.html#projects" class="btn-outline">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        All Projects
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>© 2026 Dragos Patca &nbsp;·&nbsp; Built with Python · YOLOv8 · FastAPI · OpenCV · pywebview</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="lightbox.js"></script>
+<script>
+  hljs.highlightAll();
+  if (window.Lightbox && Lightbox.init) Lightbox.init();
+</script>
+</body>
+</html>
