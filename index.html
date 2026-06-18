@@ -1243,11 +1243,39 @@
                 </div>
             </div>
 
+            <!-- Project: VISION SECURITY — Perimeter Safety System -->
+            <div class="project-card fade-in">
+                <span class="project-tag">AI Vision Safety</span>
+                <div class="project-image" style="background:#000; overflow:hidden;">
+                    <video src="videos/safety-vision-demo.mp4" poster="images/safety-vision.png" controls preload="metadata" playsinline style="width:100%; display:block;"></video>
+                </div>
+                <h3>VISION SECURITY — PERIMETER SAFETY</h3>
+                <p class="project-description">A real-time, camera-based person-detection safety system that protects people working next to dangerous machinery. A webcam (or industrial RTSP stream) watches a danger zone: when someone enters the warning ring the machine is commanded to SLOW, and the moment they reach the critical zone it is commanded to STOP. Built around a YOLOv8 detection pipeline, a fail-safe hysteresis state machine, two-tone audio alarms, and automatic evidence capture — wrapped in an Apple-grade frosted-glass interface.</p>
+                <div class="project-status">FUNCTIONAL PROTOTYPE · LIFE-SAFETY</div>
+                <div class="project-specs">
+                    Detection: YOLOv8 (decoupled FHD capture / 640px inference)<br>
+                    Zones: operator draws STOP zone → SLOW ring auto-derived<br>
+                    Classification: full bounding-box collision (fail-safe)<br>
+                    Logic: hysteresis state machine — fast escalate / slow de-escalate<br>
+                    Output: RUN / SLOW / STOP machine command (PLC / robot hook)<br>
+                    Evidence: annotated photo capture + SQLite event log
+                </div>
+                <div class="project-tech">
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">YOLOv8</span>
+                    <span class="tech-badge">FastAPI</span>
+                    <span class="tech-badge">WebSocket</span>
+                    <span class="tech-badge">OpenCV</span>
+                    <span class="tech-badge">pywebview</span>
+                    <span class="tech-badge">SQLite</span>
+                </div>
+            </div>
+
             <!-- Project: LiDAR Sensor Production Line -->
             <div class="project-card fade-in">
                 <span class="project-tag">Industrial Automation</span>
                 <div class="project-image" style="background:#0d1117; aspect-ratio:1; overflow:hidden;">
-                    <img src="images/lidar-hmi.png" alt="LiDAR Sensor Production Line HMI" style="width:100%; height:100%; object-fit:cover; object-position:left top; display:block;">
+                    <img src="images/LiDAR2.png" alt="LiDAR Sensor Production Line HMI" style="width:100%; height:100%; object-fit:cover; object-position:left top; display:block;">
                 </div>
                 <h3>LIDAR SENSOR PRODUCTION LINE</h3>
                 <p class="project-description">A full digital-twin simulation of a 5-stage line that assembles the 360° LiDAR sensor used in the Robobist P1000 autonomous pallet truck. Multithreaded Python backend, a professional dark-theme industrial HMI, dual-PID thermal control, and a complete SCADA / Quality-Control / CMMS stack with InfluxDB + Grafana telemetry.</p>
